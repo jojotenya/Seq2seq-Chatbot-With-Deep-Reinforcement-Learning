@@ -10,6 +10,7 @@ from termcolor import colored
 
 import data_utils
 import seq2seq_model
+from seq2seq import bernoulli_sampling
 from sentiment_analysis import run
 from sentiment_analysis import dataset
 from flags import FLAGS
