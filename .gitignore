@@ -12,3 +12,4 @@ sentiment_analysis/corpus/*
 sentiment_analysis/saved_model/*
 test.py
 fb_setting.py
+*.txt

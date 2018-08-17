@@ -14,20 +14,8 @@ from seq2seq import bernoulli_sampling
 from sentiment_analysis import run
 from sentiment_analysis import dataset
 from flags import FLAGS
-
-with open('replace_words.json','r') as f:
-   replace_words = json.load(f) 
-
-SEED = 112
-
-buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
-buckets = [(10, 10), (15, 15), (25, 25), (50, 50)]
-
-def sub_words(word):
-    for rep in replace_words.keys():
-        if rep in word:
-            word = re.sub(rep,replace_words[rep],word)
-    return word
+from settings import SEED, buckets, replace_words
+from utils import sub_words
 
 # mode variable has three different mode:
 # 1. MLE
@@ -76,6 +64,7 @@ def create_seq2seq(session, mode):
   return model
 
 def train_MLE(): 
+  '''
   data_utils.prepare_whole_data(FLAGS.source_data_dir, FLAGS.target_data_dir, FLAGS.vocab_size)
 
   # read dataset and split to training set and validation set
@@ -89,6 +78,18 @@ def train_MLE():
   for i in range(len(d)):
     d_train[i] = d[i][:int(0.9 * len(d[i]))]
     d_valid[i] = d[i][int(-0.1 * len(d[i])):]
+  '''
+
+  d_trains = data_utils.read_data(FLAGS.source_data_dir + '_train.token',FLAGS.target_data_dir + '_train.token',buckets)
+  d_vals = data_utils.read_data(FLAGS.source_data_dir + '_val.token',FLAGS.target_data_dir + '_val.token',buckets)
+  
+  print('Total document size of training data: %s' % sum(len(l) for l in d_trains))
+  print('Total document size of validation data: %s' % sum(len(l) for l in d_vals))
+  d_train = [[] for _ in range(len(d_trains))]
+  d_valid = [[] for _ in range(len(d_vals))]
+  for i in range(len(d_trains)):
+    d_train[i] = d_trains[i][:int(0.9 * len(d_trains[i]))]
+    d_valid[i] = d_vals[i][int(-0.1 * len(d_vals[i])):]
 
   train_bucket_sizes = [len(d_train[b]) for b in range(len(d_train))]
   train_total_size = float(sum(train_bucket_sizes))
@@ -143,7 +144,7 @@ def train_MLE():
       if step % FLAGS.check_step == 0:
         print('Step %s, Training perplexity: %s, Learning rate: %s' % (step, math.exp(loss),
                                   sess.run(model.learning_rate))) 
-        for i in range(len(d)):
+        for i in range(len(d_train)):
           encoder_input, decoder_input, weight = model.get_batch(d_valid, i)
           loss_valid, _ = model.run(sess, encoder_input, decoder_input, weight, i, forward_only = True)
           print('  Validation perplexity in bucket %s: %s' % (i, math.exp(loss_valid)))
@@ -192,10 +193,14 @@ def train_RL():
     encoder_input, encoder_length, _ = model_SA.get_batch([(0, token_ids)])
     return model_SA.step(sess3, encoder_input, encoder_length)[0][0]
 
+  '''
   data_utils.prepare_whole_data(FLAGS.source_data_dir, FLAGS.target_data_dir, FLAGS.vocab_size)
   d = data_utils.read_data(FLAGS.source_data_dir + '.token', FLAGS.target_data_dir + '.token', buckets)
+  '''
 
-  train_bucket_sizes = [len(d[b]) for b in range(len(d))]
+  d = data_utils.read_data(FLAGS.source_data_dir + '_train.token',FLAGS.target_data_dir + '_train.token',buckets)
+
+  train_bucket_sizes = [len(d_train[b]) for b in range(len(d_train))]
   train_total_size = float(sum(train_bucket_sizes))
   train_buckets_scale = [sum(train_bucket_sizes[:i + 1]) / train_total_size
                          for i in range(len(train_bucket_sizes))]

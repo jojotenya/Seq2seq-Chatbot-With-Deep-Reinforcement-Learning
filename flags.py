@@ -6,6 +6,7 @@ hidden_size = 512
 num_layers = 4 
 batch_size = 32
 model_dir = 'model/xhj_ptt_%s_%s_%s_sche/'%(hidden_size,num_layers,batch_size) 
+model_dir = 'model/tmp/'
 model_RL_dir = 'model_RL/xhj_ptt_%s_%s_%s/'%(hidden_size,num_layers,batch_size)
 if not os.path.exists(model_dir):
     print('create model dir: ',model_dir)

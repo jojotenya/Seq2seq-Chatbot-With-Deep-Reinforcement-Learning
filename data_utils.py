@@ -119,12 +119,13 @@ def file_to_token(file_path, vocab_map, nltk_tokenizer):
 
           output_file.write(" ".join([str(tok) for tok in token_ids]) + '\n')
 
-def prepare_whole_data(input_path_1, input_path_2, max_size, nltk_tokenizer = False):
+def prepare_whole_data(input_path_1, input_path_2, max_size, nltk_tokenizer = False, skip_to_token = False):
   form_vocab_mapping(input_path_1, input_path_2, max_size, nltk_tokenizer)
   map_path = input_path_1 + '.' + str(max_size) + '.mapping'  
   vocab_map, _ = read_map(map_path)
-  file_to_token(input_path_1, vocab_map, nltk_tokenizer)
-  file_to_token(input_path_2, vocab_map, nltk_tokenizer)
+  if not skip_to_token:
+    file_to_token(input_path_1, vocab_map, nltk_tokenizer)
+    file_to_token(input_path_2, vocab_map, nltk_tokenizer)
 
 
 def read_data(source_path, target_path, bucket):
