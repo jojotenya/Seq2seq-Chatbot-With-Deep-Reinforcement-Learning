@@ -41,13 +41,13 @@ def word_seg(input_file,output_file,mode):
     
     with open(output_file,'w') as f, open(input_file,'r') as fi:
         for l in fi:
-          # remove all whitespace characters
-          l = ''.join(l.split())
-          if mode == 'char':
-            f.write(' '.join(list(l)) + '\n')
-          else:
-            seg = jieba.cut(l, cut_all=False)
-            f.write(' '.join(seg) + '\n')
+            # remove all whitespace characters
+            l = ''.join(l.split())
+            if mode == 'char':
+                f.write(' '.join(list(l)) + '\n')
+            else:
+                seg = jieba.cut(l, cut_all=False)
+                f.write(' '.join(seg) + '\n')
 
 def split_train_val(source,target,buckets=buckets):
     data = [[] for i in range(len(buckets))]
@@ -62,7 +62,8 @@ def split_train_val(source,target,buckets=buckets):
     with open(source,'r') as src, open(target,'r') as trg:
         for s,t in src,trg:
             sl, tl = len(s.split()), len(t.split())
-            for bucket_id, (source_size, target_size) in enumerate(buckets):         if sl < source_size and tl < target_size:
+            for bucket_id, (source_size, target_size) in enumerate(buckets):         
+                if sl < source_size and tl < target_size:
                     data[bucket_id].append((s, t, sl, tl))
                     break
     with open(source+'_train', 'w') as src_train,
