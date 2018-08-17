@@ -8,5 +8,5 @@ split_ratio = 0.9
 with open('replace_words.json','r') as f:
     replace_words = json.load(f)
 
-# for reset schedule sampling probility
+# for reset schedule sampling probability
 reset_prob = 1.0
