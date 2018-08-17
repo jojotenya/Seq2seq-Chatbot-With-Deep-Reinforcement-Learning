@@ -10,3 +10,6 @@ with open('replace_words.json','r') as f:
 
 # for reset schedule sampling probability
 reset_prob = 1.0
+
+# word size upper bound
+WORD_DIM = 60000

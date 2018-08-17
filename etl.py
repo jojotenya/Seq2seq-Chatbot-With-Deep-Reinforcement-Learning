@@ -25,13 +25,12 @@ word_seg(args.trg_inp,args.trg,args.mode.lower())
 data_utils.prepare_whole_data(FLAGS.source_data_dir, FLAGS.target_data_dir, FLAGS.vocab_size, skip_to_token=True)
 
 #step 2. split data into train & val
-split_train_val(arg.src,arg.trg)
+split_train_val(args.src,args.trg)
 
 #step 3. generate tokens of train & val
-map_path = 'corpus/mapping'
+map_path = 'corpus/source.%s.mapping'%WORD_DIM
 vocab_map, _ = data_utils.read_map(map_path)
 files = [FLAGS.source_data_dir+'_train',FLAGS.source_data_dir+'_val',
          FLAGS.target_data_dir+'_train',FLAGS.target_data_dir+'_val']
 for f in files:
   data_utils.file_to_token(f,vocab_map,False)
-

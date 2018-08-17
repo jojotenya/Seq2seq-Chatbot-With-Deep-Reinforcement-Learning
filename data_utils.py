@@ -4,12 +4,11 @@ from __future__ import division
 import re
 import sys
 #import nltk
+from settings import WORD_DIM
 
 import tensorflow as tf
 from tensorflow.python.platform import gfile
 
-WORD_DIM = 6258 
-WORD_DIM = 8081 
 WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
 DIGIT_RE = re.compile(br"\d")
 DU_RE = re.compile(b"\!")

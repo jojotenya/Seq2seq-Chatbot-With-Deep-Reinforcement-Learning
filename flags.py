@@ -1,6 +1,7 @@
 import tensorflow as tf
 import data_utils
 import os
+from settings import WORD_DIM
 
 hidden_size = 512
 num_layers = 4 
@@ -14,7 +15,7 @@ if not os.path.exists(model_RL_dir):
     print('create model RL dir: ',model_RL_dir)
     os.mkdir(model_RL_dir)
 
-tf.app.flags.DEFINE_integer('vocab_size', data_utils.WORD_DIM, 'vocabulary size of the input')
+tf.app.flags.DEFINE_integer('vocab_size', WORD_DIM, 'vocabulary size of the input')
 tf.app.flags.DEFINE_integer('hidden_size', hidden_size, 'number of units of hidden layer')
 tf.app.flags.DEFINE_integer('num_layers', num_layers, 'number of layers')
 tf.app.flags.DEFINE_integer('batch_size', batch_size, 'batch size')

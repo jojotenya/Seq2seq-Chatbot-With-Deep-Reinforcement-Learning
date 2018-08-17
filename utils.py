@@ -51,25 +51,26 @@ def word_seg(input_file,output_file,mode):
 
 def split_train_val(source,target,buckets=buckets):
     data = [[] for i in range(len(buckets))]
-    src = list(src)
-    np.random.seed(SEED)
-    np.random.shuffle(src)
-    src = iter(src)
-    trg = list(trg)
-    np.random.seed(SEED)
-    np.random.shuffle(trg)
-    trg = iter(trg)
     with open(source,'r') as src, open(target,'r') as trg:
-        for s,t in src,trg:
+        src = list(src)
+        np.random.seed(SEED)
+        np.random.shuffle(src)
+        src = iter(src)
+        trg = list(trg)
+        np.random.seed(SEED)
+        np.random.shuffle(trg)
+        trg = iter(trg)
+        for s,t in zip(src,trg):
             sl, tl = len(s.split()), len(t.split())
             for bucket_id, (source_size, target_size) in enumerate(buckets):         
                 if sl < source_size and tl < target_size:
                     data[bucket_id].append((s, t, sl, tl))
                     break
-    with open(source+'_train', 'w') as src_train,
-         open(source+'_val', 'w') as src_val,
-         open(train+'_train', 'w') as trg_train,
-         open(train+'_val','w') as trg_val:
+
+    with open(source+'_train', 'w') as src_train,\
+         open(source+'_val', 'w') as src_val,\
+         open(target+'_train', 'w') as trg_train,\
+         open(target+'_val','w') as trg_val:
 
         for b, ds in zip(buckets, data):
             dl = len(ds)
