@@ -14,7 +14,7 @@ from seq2seq import bernoulli_sampling
 from sentiment_analysis import run
 from sentiment_analysis import dataset
 from flags import FLAGS
-from settings import SEED, buckets, replace_words
+from settings import SEED, buckets, replace_words, reset_prob
 from utils import sub_words
 
 # mode variable has three different mode:
@@ -111,7 +111,7 @@ def train_MLE():
     model = create_seq2seq(sess, 'MLE')
     if FLAGS.reset_sampling_prob: 
       with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
-        sess.run(tf.assign(model.sampling_probability,1.0))
+        sess.run(tf.assign(model.sampling_probability,reset_prob))
     print('model.sampling_probability: ',model.sampling_probability)
     #sess.run(tf.assign(model.sampling_probability,1.0))
     step = 0
