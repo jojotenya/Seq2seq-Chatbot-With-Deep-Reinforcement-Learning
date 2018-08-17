@@ -15,8 +15,7 @@ from sentiment_analysis import run
 from sentiment_analysis import dataset
 from flags import FLAGS 
 from run import replace_words,SEED,buckets,sub_words,create_seq2seq
-from util import *
-
+from utils import qulify_sentence 
 
 sess = tf.Session()
 vocab_dict, vocab_list = data_utils.read_map(FLAGS.source_data_dir + '.' + str(FLAGS.vocab_size) + '.mapping')
