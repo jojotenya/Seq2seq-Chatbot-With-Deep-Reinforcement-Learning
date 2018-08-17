@@ -108,6 +108,11 @@ def train_MLE():
   with tf.Session() as sess:
 
     model = create_seq2seq(sess, 'MLE')
+    if FLAGS.reset_sampling_prob: 
+      with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
+        sess.run(tf.assign(model.sampling_probability,1.0))
+    print('model.sampling_probability: ',model.sampling_probability)
+    #sess.run(tf.assign(model.sampling_probability,1.0))
     step = 0
     loss = 0
     loss_list = []
@@ -130,13 +135,10 @@ def train_MLE():
       #print('batch_size: ',len(weight))           ==> 15,50,...
       loss_train, _ = model.run(sess, encoder_input, decoder_input, weight, bucket_id)
       loss += loss_train / FLAGS.check_step
-      #print(model.token2word(sen)[0])
-      if step!=0 and step % FLAGS.sampling_decay_steps == 0:
-        sess.run(model.sampling_probability_decay)
-        print('sampling_probability: ',sess.run(model.sampling_probability))
-        if_feed_prev = bernoulli_sampling(model.sampling_probability)
-        if_feed_prev = sess.run(if_feed_prev)
-        print('if_feed_prev: ',not if_feed_prev)
+
+      #if step!=0 and step % FLAGS.sampling_decay_steps == 0:
+      #  sess.run(model.sampling_probability_decay)
+      #  print('sampling_probability: ',sess.run(model.sampling_probability))
         
       if step % FLAGS.check_step == 0:
         print('Step %s, Training perplexity: %s, Learning rate: %s' % (step, math.exp(loss),
@@ -147,6 +149,10 @@ def train_MLE():
           print('  Validation perplexity in bucket %s: %s' % (i, math.exp(loss_valid)))
         if len(loss_list) > 2 and loss > max(loss_list[-3:]):
           sess.run(model.learning_rate_decay)
+        else:
+          if step!=0:
+            sess.run(model.sampling_probability_decay)
+            print('sampling_probability: ',sess.run(model.sampling_probability))
         loss_list.append(loss)  
         loss = 0
 

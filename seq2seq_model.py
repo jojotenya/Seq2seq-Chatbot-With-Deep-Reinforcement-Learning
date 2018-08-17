@@ -68,18 +68,21 @@ class Seq2seq():
     # schedule sampling
     self.schedule_sampling = schedule_sampling
     if self.schedule_sampling == 'False': self.schedule_sampling = False
-    self.sampling_probability = 1.0
+    self.init_sampling_probability = 1.0
     self.sampling_global_step = sampling_global_step
     self.sampling_decay_steps = sampling_decay_steps 
     self.sampling_decay_rate = sampling_decay_rate 
 
     if self.schedule_sampling == 'linear':
-      self.decay_fixed = self.sampling_probability * (self.sampling_decay_steps / self.sampling_global_step)
-      self.sampling_probability = tf.Variable(self.sampling_probability, trainable=False)
+      self.decay_fixed = self.init_sampling_probability * (self.sampling_decay_steps / self.sampling_global_step)
+      with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
+        self.sampling_probability = tf.get_variable(name=self.schedule_sampling,initializer=tf.constant(self.init_sampling_probability),trainable=False)
       self.sampling_probability_decay = tf.assign_sub(self.sampling_probability, self.decay_fixed)
-      self.sampling_probability = tf.maximum(self.sampling_probability,tf.constant(0.0))
+      self.sampling_probability_clip = tf.clip_by_value(self.sampling_probability,0.0,1.0)
+      #self.sampling_probability = tf.maximum(self.sampling_probability,tf.constant(0.0))
     elif self.schedule_sampling == 'exp':
-      self.sampling_probability = tf.Variable(self.sampling_probability, trainable=False)
+      with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
+        self.sampling_probability = tf.get_variable(name=self.schedule_sampling,initializer=tf.constant(self.init_sampling_probability),trainable=False)
       #self.sampling_probability = tf.train.exponential_decay(
       self.sampling_probability_decay = tf.assign(
         self.sampling_probability,
@@ -90,8 +93,10 @@ class Seq2seq():
           self.sampling_decay_rate,
           staircase = True)
       )
+      self.sampling_probability_clip = tf.clip_by_value(self.sampling_probability,0.0,1.0)
     elif self.schedule_sampling == 'inverse_sigmoid':
-      self.sampling_probability = tf.Variable(self.sampling_probability, trainable=False)
+      with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
+        self.sampling_probability = tf.get_variable(name=self.schedule_sampling,initializer=tf.constant(self.init_sampling_probability),trainable=False)
       self.sampling_probability_decay = tf.assign(
         self.sampling_probability,
         #tf.train.cosine_decay(
@@ -101,6 +106,7 @@ class Seq2seq():
           self.sampling_global_step,
         )
       )
+      self.sampling_probability_clip = tf.clip_by_value(self.sampling_probability,0.0,1.0)
     elif not self.schedule_sampling:
       pass
     else:
@@ -176,7 +182,7 @@ class Seq2seq():
              beam_size = self.beam_size,
              loop = loop_function_RL,
              schedule_sampling = self.schedule_sampling,
-             sampling_probability = self.sampling_probability)
+             sampling_probability = self.sampling_probability_clip)
     
     # inputs
     self.encoder_inputs = []
