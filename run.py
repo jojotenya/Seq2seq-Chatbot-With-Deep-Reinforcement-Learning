@@ -153,7 +153,7 @@ def train_MLE():
         else:
           if step!=0:
             sess.run(model.sampling_probability_decay)
-            print('sampling_probability: ',sess.run(model.sampling_probability))
+            print('sampling_probability: ',sess.run(model.sampling_probability_clip))
         loss_list.append(loss)  
         loss = 0
 
