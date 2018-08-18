@@ -40,6 +40,8 @@ tf.app.flags.DEFINE_float('sampling_decay_rate', 0.99 , 'schedule sampling decay
 tf.app.flags.DEFINE_integer('sampling_global_step', 150000, 'sampling_global_step')
 tf.app.flags.DEFINE_integer('sampling_decay_steps', 500, 'sampling_decay_steps')
 tf.app.flags.DEFINE_boolean('reset_sampling_prob', False, 'reset_sampling_prob')
+# word segmentation type
+tf.app.flags.DEFINE_string('word_seg', 'char', 'word segmentation type')
 
 
 FLAGS = tf.app.flags.FLAGS

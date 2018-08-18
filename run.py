@@ -235,6 +235,9 @@ def train_RL():
 
 
 def test():
+  if FLAGS.word_seg == 'word':
+    import jieba
+    jieba.initialize()
   sess = tf.Session()
   vocab_dict, vocab_list = data_utils.read_map(FLAGS.source_data_dir + '.' + str(FLAGS.vocab_size) + '.mapping')
   model = create_seq2seq(sess, 'TEST')
@@ -243,8 +246,10 @@ def test():
   sys.stdout.write("Input sentence: ")
   sys.stdout.flush()
   sentence = sys.stdin.readline()
-  sentence = (' ').join([s for s in sentence])
-
+  if FLAGS.word_seg == 'word':
+    sentence = (' ').join(jieba.lcut(sentence))
+  elif FLAGS.word_seg == 'char':
+    sentence = (' ').join([s for s in sentence])
   while(sentence):
     token_ids = data_utils.convert_to_token(tf.compat.as_bytes(sentence), vocab_dict, False)
     bucket_id = len(buckets) - 1
@@ -305,6 +310,7 @@ def test():
           outputs = outputs[:outputs.index(data_utils.EOS_ID)]
         sys_reply = "".join([tf.compat.as_str(vocab_list[output]) for output in outputs])
         sys_reply = sub_words(sys_reply)
+        sys_reply = qulify_sentence(sys_reply)
         print("Syetem reply(MLE): " + sys_reply)
 
 
@@ -313,7 +319,10 @@ def test():
     print("User input  : ", end="")
     sys.stdout.flush()
     sentence = sys.stdin.readline()
-    sentence = (' ').join([s for s in sentence])
+    if FLAGS.word_seg == 'word':
+      sentence = (' ').join(jieba.lcut(sentence))
+    elif FLAGS.word_seg == 'char':
+      sentence = (' ').join([s for s in sentence])
 
 if __name__ == '__main__':
   if FLAGS.mode == 'MLE':
