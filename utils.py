@@ -1,6 +1,6 @@
 import re
 import jieba
-from settings import buckets,split_ratio,SEED
+from settings import buckets,split_ratio,SEED,replace_words
 import numpy as np
 
 len_2 = ['樂']

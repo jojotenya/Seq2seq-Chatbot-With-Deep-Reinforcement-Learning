@@ -14,8 +14,8 @@ from seq2seq import bernoulli_sampling
 from sentiment_analysis import run
 from sentiment_analysis import dataset
 from flags import FLAGS
-from settings import SEED, buckets, replace_words, reset_prob
-from utils import sub_words
+from settings import SEED, buckets, replace_words, reset_prob 
+from utils import sub_words, qulify_sentence
 
 # mode variable has three different mode:
 # 1. MLE
@@ -279,6 +279,7 @@ def test():
             for i,outputs in enumerate(outputss):
                 sys_reply = "".join([tf.compat.as_str(vocab_list[output]) for output in outputs])
                 sys_reply = sub_words(sys_reply)
+                sys_reply = qulify_sentence(sys_reply)
                 if i == 0:
                     print(colored("Syetem reply(bs best): " + sys_reply,"red"))
                 else:
@@ -290,6 +291,7 @@ def test():
               outputs = outputs[:outputs.index(data_utils.EOS_ID)]
             sys_reply = "".join([tf.compat.as_str(vocab_list[output]) for output in outputs])
             sys_reply = sub_words(sys_reply)
+            sys_reply = qulify_sentence(sys_reply)
             print("Syetem reply(bs best): " + sys_reply)
             
 

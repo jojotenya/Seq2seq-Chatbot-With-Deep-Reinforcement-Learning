@@ -66,6 +66,7 @@ class Seq2seq():
     self.beam_size = beam_size
 
     # schedule sampling
+    self.sampling_probability_clip = None 
     self.schedule_sampling = schedule_sampling
     if self.schedule_sampling == 'False': self.schedule_sampling = False
     self.init_sampling_probability = 1.0
