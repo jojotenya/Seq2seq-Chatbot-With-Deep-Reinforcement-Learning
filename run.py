@@ -114,7 +114,7 @@ def train_MLE():
     loss_list = []
  
     print('sampling_decay_steps: ',FLAGS.sampling_decay_steps)
-    print('sampling_probability: ',sess.run(model.sampling_probability_clip))
+    print('sampling_probability: ',sess.run(model.sampling_probability))
     print('-----')
     while(True):
       step += 1
