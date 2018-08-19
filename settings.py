@@ -12,4 +12,7 @@ with open('replace_words.json','r') as f:
 reset_prob = 1.0
 
 # word size upper bound
-WORD_DIM = 8081 
+WORD_DIM = 60000 
+
+# apply same word segment strategy to both source and target or not
+word_seg_strategy = 'diff'

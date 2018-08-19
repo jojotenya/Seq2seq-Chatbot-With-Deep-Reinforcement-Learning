@@ -13,8 +13,7 @@ import seq2seq_model
 from seq2seq import bernoulli_sampling
 from sentiment_analysis import run
 from sentiment_analysis import dataset
-from flags import FLAGS
-from settings import SEED, buckets, replace_words, reset_prob 
+from flags import FLAGS, SEED, buckets, replace_words, reset_prob 
 from utils import qulify_sentence
 
 # mode variable has three different mode:
@@ -32,7 +31,8 @@ def create_seq2seq(session, mode):
     print('FLAGS.beam_size: ',FLAGS.beam_size)
     print('FLAGS.debug: ',bool(FLAGS.debug))
       
-  model = seq2seq_model.Seq2seq(vocab_size = FLAGS.vocab_size,
+  model = seq2seq_model.Seq2seq(src_vocab_size = FLAGS.src_vocab_size,
+                                trg_vocab_size = FLAGS.trg_vocab_size,
                                 buckets = buckets,
                                 size = FLAGS.hidden_size,
                                 num_layers = FLAGS.num_layers,
@@ -65,10 +65,10 @@ def create_seq2seq(session, mode):
 
 def train_MLE(): 
   '''
-  data_utils.prepare_whole_data(FLAGS.source_data_dir, FLAGS.target_data_dir, FLAGS.vocab_size)
+  data_utils.prepare_whole_data(FLAGS.source_data, FLAGS.target_data, FLAGS.src_vocab_size, FLAGS.trg_vocab_size)
 
   # read dataset and split to training set and validation set
-  d = data_utils.read_data(FLAGS.source_data_dir + '.token', FLAGS.target_data_dir + '.token', buckets)
+  d = data_utils.read_data(FLAGS.source_data + '.token', FLAGS.target_data + '.token', buckets)
   np.random.seed(SEED)
   np.random.shuffle(d)
   print('Total document size: %s' % sum(len(l) for l in d))
@@ -80,16 +80,11 @@ def train_MLE():
     d_valid[i] = d[i][int(-0.1 * len(d[i])):]
   '''
 
-  d_trains = data_utils.read_data(FLAGS.source_data_dir + '_train.token',FLAGS.target_data_dir + '_train.token',buckets)
-  d_vals = data_utils.read_data(FLAGS.source_data_dir + '_val.token',FLAGS.target_data_dir + '_val.token',buckets)
+  d_train = data_utils.read_data(FLAGS.source_data + '_train.token',FLAGS.target_data + '_train.token',buckets)
+  d_valid = data_utils.read_data(FLAGS.source_data + '_val.token',FLAGS.target_data + '_val.token',buckets)
   
-  print('Total document size of training data: %s' % sum(len(l) for l in d_trains))
-  print('Total document size of validation data: %s' % sum(len(l) for l in d_vals))
-  d_train = [[] for _ in range(len(d_trains))]
-  d_valid = [[] for _ in range(len(d_vals))]
-  for i in range(len(d_trains)):
-    d_train[i] = d_trains[i][:int(0.9 * len(d_trains[i]))]
-    d_valid[i] = d_vals[i][int(-0.1 * len(d_vals[i])):]
+  print('Total document size of training data: %s' % sum(len(l) for l in d_train))
+  print('Total document size of validation data: %s' % sum(len(l) for l in d_valid))
 
   train_bucket_sizes = [len(d_train[b]) for b in range(len(d_train))]
   train_total_size = float(sum(train_bucket_sizes))
@@ -194,11 +189,11 @@ def train_RL():
     return model_SA.step(sess3, encoder_input, encoder_length)[0][0]
 
   '''
-  data_utils.prepare_whole_data(FLAGS.source_data_dir, FLAGS.target_data_dir, FLAGS.vocab_size)
-  d = data_utils.read_data(FLAGS.source_data_dir + '.token', FLAGS.target_data_dir + '.token', buckets)
+  data_utils.prepare_whole_data(FLAGS.source_data, FLAGS.target_data, FLAGS.src_vocab_size, FLAGS.trg_vocab_size)
+  d = data_utils.read_data(FLAGS.source_data + '.token', FLAGS.target_data + '.token', buckets)
   '''
 
-  d = data_utils.read_data(FLAGS.source_data_dir + '_train.token',FLAGS.target_data_dir + '_train.token',buckets)
+  d = data_utils.read_data(FLAGS.source_data + '_train.token',FLAGS.target_data + '_train.token',buckets)
 
   train_bucket_sizes = [len(d_train[b]) for b in range(len(d_train))]
   train_total_size = float(sum(train_bucket_sizes))
@@ -206,7 +201,7 @@ def train_RL():
                          for i in range(len(train_bucket_sizes))]
 
   # make RL object read vocab mapping dict, list  
-  model.RL_readmap(FLAGS.source_data_dir + '.' + str(FLAGS.vocab_size) + '.mapping')
+  model.RL_readmap(FLAGS.source_data + '.' + str(FLAGS.vocab_size) + '.mapping')
   step = 0
   while(True):
     step += 1
@@ -235,20 +230,20 @@ def train_RL():
 
 
 def test():
-  if FLAGS.word_seg == 'word':
+  if FLAGS.src_word_seg == 'word':
     import jieba
     jieba.initialize()
   sess = tf.Session()
-  vocab_dict, vocab_list = data_utils.read_map(FLAGS.source_data_dir + '.' + str(FLAGS.vocab_size) + '.mapping')
+  vocab_dict, vocab_list = data_utils.read_map(FLAGS.source_data + '.' + str(FLAGS.src_vocab_size) + '.mapping')
   model = create_seq2seq(sess, 'TEST')
   model.batch_size = 1
   
   sys.stdout.write("Input sentence: ")
   sys.stdout.flush()
   sentence = sys.stdin.readline()
-  if FLAGS.word_seg == 'word':
+  if FLAGS.src_word_seg == 'word':
     sentence = (' ').join(jieba.lcut(sentence))
-  elif FLAGS.word_seg == 'char':
+  elif FLAGS.src_word_seg == 'char':
     sentence = (' ').join([s for s in sentence])
   while(sentence):
     token_ids = data_utils.convert_to_token(tf.compat.as_bytes(sentence), vocab_dict, False)
@@ -319,9 +314,9 @@ def test():
     print("User input  : ", end="")
     sys.stdout.flush()
     sentence = sys.stdin.readline()
-    if FLAGS.word_seg == 'word':
+    if FLAGS.src_word_seg == 'word':
       sentence = (' ').join(jieba.lcut(sentence))
-    elif FLAGS.word_seg == 'char':
+    elif FLAGS.src_word_seg == 'char':
       sentence = (' ').join([s for s in sentence])
 
 if __name__ == '__main__':
@@ -331,5 +326,3 @@ if __name__ == '__main__':
     train_RL()
   else:
     test()
-
-

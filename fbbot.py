@@ -18,7 +18,7 @@ from run import replace_words,SEED,buckets,sub_words,create_seq2seq
 from utils import qulify_sentence 
 
 sess = tf.Session()
-vocab_dict, vocab_list = data_utils.read_map(FLAGS.source_data_dir + '.' + str(FLAGS.vocab_size) + '.mapping')
+vocab_dict, vocab_list = data_utils.read_map(FLAGS.source_data + '.' + str(FLAGS.src_vocab_size) + '.mapping')
 model = create_seq2seq(sess, 'TEST')
 model.batch_size = 1
 

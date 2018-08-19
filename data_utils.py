@@ -4,7 +4,7 @@ from __future__ import division
 import re
 import sys
 #import nltk
-from settings import buckets,split_ratio,SEED,replace_words,WORD_DIM
+from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size
 import jieba
 import numpy as np
 
@@ -40,15 +40,17 @@ def tokenizer(sentence):
 # Form vocab map (vocab to index) according to maxsize
 # Temporary combine source and target vocabulary map together
 # mode:[same|diff], to decide source and target share the same mapping or not
-def form_vocab_mapping(filename_1, filename_2, max_size, nltk_tokenizer=None, mode='diff'):
+def form_vocab_mapping(filename_1, filename_2, max_size_1, max_size_2, nltk_tokenizer=None, mode='diff'):
   
-  output_path = filename_1 + '.' + str(max_size) + '.mapping' 
-  output_path2 = filename_2 + '.' + str(max_size) + '.mapping' 
+  output_path = filename_1 + '.' + str(max_size_1) + '.mapping' 
+  output_path2 = filename_2 + '.' + str(max_size_2) + '.mapping' 
+  max_sizes = (max_size_1,max_size_2)
   if gfile.Exists(output_path) and gfile.Exists(output_path2):
     print('Map file has already been formed!')
   else:
     print('Forming mapping file according to %s and %s' % (filename_1, filename_2))  
-    print('Max vocabulary size : %s' % max_size)
+    print('Source max vocabulary size : %s' % max_size_1)
+    print('Target max vocabulary size : %s' % max_size_2)
 
     vocab = {}
     with gfile.GFile(filename_1, mode = 'rb') as f_1, gfile.GFile(filename_2, mode = 'rb') as f_2:
@@ -64,18 +66,19 @@ def form_vocab_mapping(filename_1, filename_2, max_size, nltk_tokenizer=None, mo
           line = tf.compat.as_bytes(line) 
           tokens = nltk.word_tokenize(line) if nltk_tokenizer else tokenizer(line)
           for w in tokens:
-            word = DIGIT_RE.sub(b"0", w)
+            #word = DIGIT_RE.sub(b"0", w)
+            word = w
             if word in vocab:
               vocab[word] += 1
             else:
               vocab[word] = 1
         if mode == 'diff':
-          output_path = fil.name + '.' + str(max_size) + '.mapping' 
-          write_mapping(vocab,max_size,output_path)
+          output_path = fil.name + '.' + str(max_sizes[i]) + '.mapping' 
+          write_mapping(vocab,max_sizes[i],output_path)
           vocab = {}
       
       if mode == 'same': 
-        write_mapping(vocab,max_size,output_path)
+        write_mapping(vocab,max_sizes[0],output_path)
         subprocess.run("ln %s %s"%(output_path,output_path2),shell=True)
 
 def write_mapping(vocab,max_size,output_path):
@@ -111,7 +114,8 @@ def convert_to_token(sentence, vocab_map, nltk_tokenizer):
   else:
     words = tokenizer(sentence)  
   
-  return [vocab_map.get(DIGIT_RE.sub(b"0", w), UNK_ID) for w in words]
+  #return [vocab_map.get(DIGIT_RE.sub(b"0", w), UNK_ID) for w in words]
+  return [vocab_map.get(w, UNK_ID) for w in words]
 
 def file_to_token(file_path, vocab_map, nltk_tokenizer):
   output_path = file_path + ".token"
@@ -131,11 +135,11 @@ def file_to_token(file_path, vocab_map, nltk_tokenizer):
 
           output_file.write(" ".join([str(tok) for tok in token_ids]) + '\n')
 
-def prepare_whole_data(input_path_1, input_path_2, max_size, nltk_tokenizer = False, skip_to_token = False, mode='diff'):
-  form_vocab_mapping(input_path_1, input_path_2, max_size, nltk_tokenizer, mode)
+def prepare_whole_data(input_path_1, input_path_2, max_size_1, max_size_2, nltk_tokenizer = False, skip_to_token = False, mode='diff'):
+  form_vocab_mapping(input_path_1, input_path_2, max_size_1, max_size_2, nltk_tokenizer, mode)
 
-  map_src_path = input_path_1 + '.' + str(max_size) + '.mapping'  
-  map_trg_path = input_path_1 + '.' + str(max_size) + '.mapping'  
+  map_src_path = input_path_1 + '.' + str(max_size_1) + '.mapping'  
+  map_trg_path = input_path_2 + '.' + str(max_size_2) + '.mapping'  
   vocab_map_src , _ = read_map(map_src_path)
   vocab_map_trg , _ = read_map(map_trg_path)
   files = {input_path_1+'_train': vocab_map_src,
@@ -261,7 +265,7 @@ def split_train_val(source,target,buckets=buckets):
                     trg_val.write(t)
     
 if __name__ == "__main__":
-  prepare_whole_data('corpus/source', 'corpus/target', WORD_DIM)
+  prepare_whole_data('corpus/source', 'corpus/target', src_vocab_size)
   #data_set_1 = read_token_data('corpus/valid.source')
   #data_set_2 = read_token_data('corpus/valid.target')
 

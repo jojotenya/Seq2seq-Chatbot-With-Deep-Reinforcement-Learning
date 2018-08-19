@@ -27,3 +27,6 @@ done
 
 mv source source_input
 mv target target_input
+mkdir pool
+mv *_ptt pool
+mv *_xhj pool

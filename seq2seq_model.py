@@ -19,7 +19,8 @@ setattr(tf.contrib.rnn.MultiRNNCell, '__deepcopy__', lambda self, _: self)
 class Seq2seq():
   
   def __init__(self,
-               vocab_size,
+               src_vocab_size,
+               trg_vocab_size,
                buckets,
                size,
                num_layers,
@@ -36,7 +37,8 @@ class Seq2seq():
                sampling_decay_steps=500
                ):
     
-    self.vocab_size = vocab_size
+    self.src_vocab_size = src_vocab_size
+    self.trg_vocab_size = trg_vocab_size
     self.buckets = buckets
     # units of rnn cell
     self.size = size
@@ -113,9 +115,9 @@ class Seq2seq():
     else:
       raise ValueError("schedule_sampling must be one of the following: [linear|exp|inverse_sigmoid|False]")
 
-    w_t = tf.get_variable('proj_w', [self.vocab_size, self.size])
+    w_t = tf.get_variable('proj_w', [self.trg_vocab_size, self.size])
     w = tf.transpose(w_t)
-    b = tf.get_variable('proj_b', [self.vocab_size])
+    b = tf.get_variable('proj_b', [self.trg_vocab_size])
     output_projection = (w, b)
 
     def sample_loss(labels, inputs):
@@ -128,13 +130,13 @@ class Seq2seq():
                                                 inputs = local_inputs,
                                                 labels = labels,
                                                 num_sampled = 512,
-                                                num_classes = self.vocab_size),
+                                                num_classes = self.trg_vocab_size),
                                                 dtype = tf.float32)
     softmax_loss_function = sample_loss
 
     #FIXME add RL function
     def seq2seq_multi(encoder_inputs, decoder_inputs, mode):
-      embedding = tf.get_variable("embedding", [self.vocab_size, self.size])
+      embedding = tf.get_variable("embedding", [self.src_vocab_size, self.size])
       loop_function_RL = None
       if mode == 'MLE':
         feed_previous = False
@@ -172,8 +174,8 @@ class Seq2seq():
              encoder_inputs,
              decoder_inputs,
              cell,
-             num_encoder_symbols = self.vocab_size,
-             num_decoder_symbols = self.vocab_size,
+             num_encoder_symbols = self.src_vocab_size,
+             num_decoder_symbols = self.trg_vocab_size,
              embedding_size = self.size,
              output_projection = output_projection,
              feed_previous = feed_previous,
