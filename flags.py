@@ -10,7 +10,7 @@ batch_size = 32
 dir_base = 'xhj_ptt_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
 model_dir = 'model/%s/'%dir_base 
 model_RL_dir = 'model_RL/%s/'%dir_base
-corpus_dir = 'corpus/%s/'%dir_base
+corpus_dir = 'corpus/%s'%dir_base
 source_data = '%s/source'%corpus_dir
 target_data = '%s/target'%corpus_dir
 if not os.path.exists(model_dir):
