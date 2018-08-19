@@ -9,8 +9,8 @@ This project is aimed to make chatbot responses more positive.
 
 ## Prerequisites
 1. Python packages:
-	- Python 3.4 or higher
-	- Tensorflow r1.0.1
+	- Python 3.6 or higher
+	- Tensorflow r1.8 or higher
 	- Numpy
 
 2. Clone this repository:
