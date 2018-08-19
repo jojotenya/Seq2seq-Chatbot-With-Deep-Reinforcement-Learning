@@ -155,6 +155,7 @@ def train_MLE():
         checkpoint_path = os.path.join(FLAGS.model_dir, "MLE.ckpt")
         model.saver.save(sess, checkpoint_path, global_step = step)
         print('Saving model at step %s' % step)
+      if step == FLAGS.sampling_global_step: break
 
 def train_RL():
   g1 = tf.Graph()
