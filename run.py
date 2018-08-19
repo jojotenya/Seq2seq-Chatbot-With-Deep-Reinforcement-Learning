@@ -16,6 +16,8 @@ from sentiment_analysis import dataset
 from flags import FLAGS, SEED, buckets, replace_words, reset_prob 
 from utils import qulify_sentence
 
+if FLAGS.schedule_sampling == 'False': FLAGS.schedule_sampling = False
+
 # mode variable has three different mode:
 # 1. MLE
 # 2. RL
@@ -107,15 +109,17 @@ def train_MLE():
     if FLAGS.reset_sampling_prob: 
       with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
         sess.run(tf.assign(model.sampling_probability,reset_prob))
-    print('model.sampling_probability: ',model.sampling_probability_clip)
+    if FLAGS.schedule_sampling:
+      print('model.sampling_probability: ',model.sampling_probability_clip)
     #sess.run(tf.assign(model.sampling_probability,1.0))
     step = 0
     loss = 0
     loss_list = []
  
-    print('sampling_decay_steps: ',FLAGS.sampling_decay_steps)
-    print('sampling_probability: ',sess.run(model.sampling_probability))
-    print('-----')
+    if FLAGS.schedule_sampling:
+      print('sampling_decay_steps: ',FLAGS.sampling_decay_steps)
+      print('sampling_probability: ',sess.run(model.sampling_probability_clip))
+      print('-----')
     while(True):
       step += 1
 
@@ -147,8 +151,9 @@ def train_MLE():
           sess.run(model.learning_rate_decay)
         else:
           if step!=0:
-            sess.run(model.sampling_probability_decay)
-            print('sampling_probability: ',sess.run(model.sampling_probability_clip))
+            if FLAGS.schedule_sampling:
+              sess.run(model.sampling_probability_decay)
+              print('sampling_probability: ',sess.run(model.sampling_probability_clip))
         loss_list.append(loss)  
         loss = 0
 
