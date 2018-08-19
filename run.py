@@ -107,14 +107,14 @@ def train_MLE():
     if FLAGS.reset_sampling_prob: 
       with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
         sess.run(tf.assign(model.sampling_probability,reset_prob))
-    print('model.sampling_probability: ',model.sampling_probability)
+    print('model.sampling_probability: ',model.sampling_probability_clip)
     #sess.run(tf.assign(model.sampling_probability,1.0))
     step = 0
     loss = 0
     loss_list = []
  
     print('sampling_decay_steps: ',FLAGS.sampling_decay_steps)
-    print('sampling_probability: ',sess.run(model.sampling_probability))
+    print('sampling_probability: ',sess.run(model.sampling_probability_clip))
     print('-----')
     while(True):
       step += 1
