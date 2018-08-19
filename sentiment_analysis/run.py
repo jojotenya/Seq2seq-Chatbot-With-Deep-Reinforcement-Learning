@@ -8,13 +8,7 @@ sys.path.append('../sentiment_analysis/')
 import dataset
 #from . import model
 import model
-
-SEED = 112
-VOCAB_SIZE = 10000
-BATCH_SIZE = 32
-UNIT_SIZE = 256
-MAX_LENGTH = 40
-CHECK_STEP = 1000.
+from settings import *
 
 def sentence_cutter(sentence):
     sentence = [s for s in sentence]

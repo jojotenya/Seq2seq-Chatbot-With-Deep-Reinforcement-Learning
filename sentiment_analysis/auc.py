@@ -9,13 +9,7 @@ import model
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 from datetime import datetime
-
-SEED = 112
-VOCAB_SIZE = 10000
-BATCH_SIZE = 32
-UNIT_SIZE = 256
-MAX_LENGTH = 40
-CHECK_STEP = 1000.
+from settings import *
 
 def create_model(session, mode):
   m = model.discriminator(VOCAB_SIZE,
