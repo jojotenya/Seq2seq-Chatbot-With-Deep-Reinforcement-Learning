@@ -28,3 +28,6 @@ data_utils.split_train_val(args.src,args.trg)
 
 #step 3. generate tokens of train & val
 data_utils.prepare_whole_data(FLAGS.source_data, FLAGS.target_data, FLAGS.src_vocab_size, FLAGS.trg_vocab_size, mode=word_seg_strategy)
+
+#step 4. pretrain fasttext
+data_utils.train_fasttext(fasttext_model,source_mapping,fasttext_hkl)

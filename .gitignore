@@ -14,3 +14,4 @@ fb_setting.py
 *.log
 *.txt
 *.csv
+*.bin

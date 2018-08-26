@@ -16,8 +16,6 @@ from sentiment_analysis import dataset
 from flags import FLAGS, SEED, buckets, replace_words, reset_prob 
 from utils import qulify_sentence
 
-if FLAGS.schedule_sampling == 'False': FLAGS.schedule_sampling = False
-
 # mode variable has three different mode:
 # 1. MLE
 # 2. RL
@@ -48,7 +46,8 @@ def create_seq2seq(session, mode):
                                 schedule_sampling = FLAGS.schedule_sampling,
                                 sampling_decay_rate = FLAGS.sampling_decay_rate,
                                 sampling_global_step = FLAGS.sampling_global_step,
-                                sampling_decay_steps = FLAGS.sampling_decay_steps
+                                sampling_decay_steps = FLAGS.sampling_decay_steps,
+                                pretrain_vec = FLAGS.pretrain_vec
                                 )
   
   #if mode != 'TEST':
@@ -207,7 +206,7 @@ def train_RL():
                          for i in range(len(train_bucket_sizes))]
 
   # make RL object read vocab mapping dict, list  
-  model.RL_readmap(FLAGS.source_data + '.' + str(FLAGS.vocab_size) + '.mapping')
+  model.RL_readmap(FLAGS.source_data + '.' + str(FLAGS.src_vocab_size) + '.mapping')
   step = 0
   while(True):
     step += 1
@@ -249,6 +248,7 @@ def test():
   sentence = sys.stdin.readline()
   if FLAGS.src_word_seg == 'word':
     sentence = (' ').join(jieba.lcut(sentence))
+    print('sentence: ',sentence)
   elif FLAGS.src_word_seg == 'char':
     sentence = (' ').join([s for s in sentence])
   while(sentence):
@@ -322,6 +322,7 @@ def test():
     sentence = sys.stdin.readline()
     if FLAGS.src_word_seg == 'word':
       sentence = (' ').join(jieba.lcut(sentence))
+      print('sentence: ',sentence)
     elif FLAGS.src_word_seg == 'char':
       sentence = (' ').join([s for s in sentence])
 

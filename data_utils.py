@@ -6,6 +6,7 @@ import sys
 #import nltk
 from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size
 import jieba
+import opencc
 import numpy as np
 
 import tensorflow as tf
@@ -263,6 +264,26 @@ def split_train_val(source,target,buckets=buckets):
                 else:
                     src_val.write(s)
                     trg_val.write(t)
+
+def simple2tradition(text):
+    return opencc.convert(text, config='zhs2zht.ini')
+
+def tradition2simple(text):
+    return opencc.convert(text,config='zht2zhs.ini')
+
+def train_fasttext(model_path,mapping,hkl_file):
+    import hickle as hkl
+    from fastText import load_model
+    model = load_model(model_path)
+    text = []
+    with open(mapping, 'r') as f:
+        for row in f.readlines():
+            row = row.strip()
+            row = tradition2simple(row)
+            vec = model.get_word_vector(row)
+            text.append(vec)
+    text = np.array(text)
+    hkl.dump(text,hkl_file)
     
 if __name__ == "__main__":
   prepare_whole_data('corpus/source', 'corpus/target', src_vocab_size)

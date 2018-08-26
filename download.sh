@@ -29,3 +29,7 @@ cd sentiment_analysis/corpus; ./download.sh; cd ../../
 
 # soft link jieba dictionary
 #cd sentiment_analysis; ln -s ../dict.txt ./
+
+# download fasttext chinese model
+wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.zh.300.bin.gz
+gunzip cc.zh.300.bin.gz

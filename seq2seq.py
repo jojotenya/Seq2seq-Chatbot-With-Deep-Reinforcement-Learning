@@ -889,7 +889,7 @@ def beam_attention_decoder(decoder_inputs,
 
         outputs = []
         prev = None
-        # attention也要定義成beam_size为的tensor
+        # attention也要定義成beam_size維的tensor
         batch_attn_size = array_ops.stack([beam_size, attn_size]) #(10,256)
         #print('batch_attn_size: ',batch_attn_size)
         attns = [array_ops.zeros(batch_attn_size, dtype=dtype) for _ in xrange(num_heads)]
