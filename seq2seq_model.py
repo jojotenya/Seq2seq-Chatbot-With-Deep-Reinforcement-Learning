@@ -35,7 +35,8 @@ class Seq2seq():
                sampling_decay_rate=0.99,
                sampling_global_step=150000,
                sampling_decay_steps=500,
-               pretrain_vec = None
+               pretrain_vec = None,
+               pretrain_trainable = False,
                ):
     
     self.src_vocab_size = src_vocab_size
@@ -70,6 +71,7 @@ class Seq2seq():
 
     # if load pretrain word vector
     self.pretrain_vec = pretrain_vec
+    self.pretrain_trainable = pretrain_trainable
 
     # schedule sampling
     self.sampling_probability_clip = None 
@@ -141,9 +143,11 @@ class Seq2seq():
     #FIXME add RL function
     def seq2seq_multi(encoder_inputs, decoder_inputs, mode, pretrain_vec = None):
       if pretrain_vec is not None: 
+        pad_num = self.src_vocab_size - pretrain_vec.shape[0]
+        pretrain_vec = np.pad(pretrain_vec, [(0, pad_num), (0, 0)], mode='constant')
         embedding = tf.get_variable(name = "embedding", 
                                     initializer = pretrain_vec,
-                                    trainable = False)
+                                    trainable = self.pretrain_trainable)
       else:
         embedding = tf.get_variable("embedding", [self.src_vocab_size, self.size])
       loop_function_RL = None

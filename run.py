@@ -47,7 +47,8 @@ def create_seq2seq(session, mode):
                                 sampling_decay_rate = FLAGS.sampling_decay_rate,
                                 sampling_global_step = FLAGS.sampling_global_step,
                                 sampling_decay_steps = FLAGS.sampling_decay_steps,
-                                pretrain_vec = FLAGS.pretrain_vec
+                                pretrain_vec = FLAGS.pretrain_vec,
+                                pretrain_trainable = FLAGS.pretrain_trainable
                                 )
   
   #if mode != 'TEST':

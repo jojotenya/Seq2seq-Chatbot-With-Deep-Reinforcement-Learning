@@ -58,6 +58,7 @@ tf.app.flags.DEFINE_string('src_word_seg', 'word', 'source word segmentation typ
 tf.app.flags.DEFINE_string('trg_word_seg', 'char', 'target word segmentation type')
 # if load pretrain word vector
 tf.app.flags.DEFINE_string('pretrain_vec', None, 'load pretrain word vector')
+tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable or not')
 
 FLAGS = tf.app.flags.FLAGS
 
