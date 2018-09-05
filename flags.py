@@ -8,7 +8,7 @@ trg_vocab_size = 6992
 hidden_size = 300 
 num_layers = 4 
 batch_size = 32
-dir_base = 'xhj_ptt_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
+dir_base = 'xhj_ptt_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
 model_dir = 'model/%s/'%dir_base 
 model_RL_dir = 'model_RL/%s/'%dir_base
 corpus_dir = 'corpus/%s/'%dir_base
@@ -50,7 +50,7 @@ tf.app.flags.DEFINE_boolean('debug', True, 'debug')
 # schedule sampling
 tf.app.flags.DEFINE_string('schedule_sampling', 'linear', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
 tf.app.flags.DEFINE_float('sampling_decay_rate', 0.99 , 'schedule sampling decay rate')
-tf.app.flags.DEFINE_integer('sampling_global_step', 10000000, 'sampling_global_step')
+tf.app.flags.DEFINE_integer('sampling_global_step', 5000000, 'sampling_global_step')
 tf.app.flags.DEFINE_integer('sampling_decay_steps', 300, 'sampling_decay_steps')
 tf.app.flags.DEFINE_boolean('reset_sampling_prob', False, 'reset_sampling_prob')
 # word segmentation type
