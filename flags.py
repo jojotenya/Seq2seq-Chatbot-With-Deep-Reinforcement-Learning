@@ -83,3 +83,16 @@ reset_prob = 1.0
 
 # apply same word segment strategy to both source and target or not
 word_seg_strategy = 'diff'
+
+# special tags 
+_PAD = b"PAD"
+_GO = b"GO"
+_EOS = b"EOS"
+_UNK = b"UNK"
+_START_VOCAB = [_PAD, _GO, _EOS, _UNK]
+SPECIAL_TAGS_COUNT = len(_START_VOCAB)
+
+PAD_ID = 0
+GO_ID = 1
+EOS_ID = 2
+UNK_ID = 3
