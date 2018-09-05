@@ -241,12 +241,13 @@ def split_train_val(source,target,buckets=buckets):
 
         for b, ds in zip(buckets, data):
             dl = len(ds)
+            split_index = int(dl*split_ratio)
             print('\n')
             print(b)
             print('data : ' + str(dl))
             for i, d in enumerate(ds):
                 (s, t, sl, tl) = d
-                if i < int(dl*split_ratio):
+                if i < split_index:
                     src_train.write(s)
                     trg_train.write(t)
                 else:
@@ -259,7 +260,7 @@ def simple2tradition(text):
 def tradition2simple(text):
     return opencc.convert(text,config='zht2zhs.ini')
 
-def train_fasttext(model_path,mapping,hkl_file):
+def load_fasttext_vec(model_path,mapping,hkl_file):
     import hickle as hkl
     from fastText import load_model
     model = load_model(model_path)
