@@ -4,7 +4,7 @@ from __future__ import division
 import re
 import sys
 #import nltk
-from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size,_START_VOCAB,SPECIAL_TAGS_COUNT,PAD_ID,GO_ID,EOS_ID,UNK_ID
+from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size,_START_VOCAB,SPECIAL_TAGS_COUNT,PAD_ID,GO_ID,EOS_ID,UNK_ID,dict_path
 import jieba
 import opencc
 import numpy as np
@@ -204,7 +204,7 @@ def sub_words(word):
 
 def word_seg(input_file,output_file,mode):
     if mode == 'word':
-        jieba.load_userdict('dict.txt')
+        jieba.load_userdict(dict_path)
     
     with open(output_file,'w') as f, open(input_file,'r') as fi:
         for l in fi:
@@ -241,12 +241,13 @@ def split_train_val(source,target,buckets=buckets):
 
         for b, ds in zip(buckets, data):
             dl = len(ds)
+            split_index = int(dl*split_ratio)
             print('\n')
             print(b)
             print('data : ' + str(dl))
             for i, d in enumerate(ds):
                 (s, t, sl, tl) = d
-                if i < int(dl*split_ratio):
+                if i < split_index:
                     src_train.write(s)
                     trg_train.write(t)
                 else:
@@ -259,7 +260,7 @@ def simple2tradition(text):
 def tradition2simple(text):
     return opencc.convert(text,config='zht2zhs.ini')
 
-def train_fasttext(model_path,mapping,hkl_file):
+def load_fasttext_vec(model_path,mapping,hkl_file,t2s=False):
     import hickle as hkl
     from fastText import load_model
     model = load_model(model_path)
@@ -267,7 +268,8 @@ def train_fasttext(model_path,mapping,hkl_file):
     with open(mapping, 'r') as f:
         for row in f.readlines():
             row = row.strip()
-            row = tradition2simple(row)
+            if t2s:
+                row = tradition2simple(row)
             vec = model.get_word_vector(row)
             text.append(vec)
     text = np.array(text)

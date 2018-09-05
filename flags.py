@@ -2,6 +2,7 @@ import tensorflow as tf
 import os
 import json
 import hickle as hkl 
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 src_vocab_size = 200000 
 trg_vocab_size = 6992 
@@ -13,8 +14,8 @@ model_dir = 'model/%s/'%dir_base
 model_RL_dir = 'model_RL/%s/'%dir_base
 corpus_dir = 'corpus/%s/'%dir_base
 fasttext_model = './cc.zh.300.bin'
-source_data = '%s/source'%corpus_dir
-target_data = '%s/target'%corpus_dir
+source_data = '%ssource'%corpus_dir
+target_data = '%starget'%corpus_dir
 source_mapping = '%s.%s.mapping'%(source_data,src_vocab_size)
 fasttext_hkl = '%sfasttext.hkl'%corpus_dir 
 if not os.path.exists(model_dir):
@@ -73,7 +74,7 @@ print('trainable: ',FLAGS.pretrain_trainable)
 # for data etl
 SEED = 112
 buckets = [(10, 10), (15, 15), (25, 25), (50, 50)]
-split_ratio = 0.9
+split_ratio = 0.9975
 
 # for inference filter dirty words
 with open('replace_words.json','r') as f:
@@ -97,3 +98,7 @@ PAD_ID = 0
 GO_ID = 1
 EOS_ID = 2
 UNK_ID = 3
+
+# word segmentation dictionary
+dict_path = 'dict_fasttext.txt'
+dict_path = os.path.join(dirname,dict_path)
