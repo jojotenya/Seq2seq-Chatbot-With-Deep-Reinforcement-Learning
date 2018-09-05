@@ -260,7 +260,7 @@ def simple2tradition(text):
 def tradition2simple(text):
     return opencc.convert(text,config='zht2zhs.ini')
 
-def load_fasttext_vec(model_path,mapping,hkl_file):
+def load_fasttext_vec(model_path,mapping,hkl_file,t2s=False):
     import hickle as hkl
     from fastText import load_model
     model = load_model(model_path)
@@ -268,7 +268,8 @@ def load_fasttext_vec(model_path,mapping,hkl_file):
     with open(mapping, 'r') as f:
         for row in f.readlines():
             row = row.strip()
-            row = tradition2simple(row)
+            if t2s:
+                row = tradition2simple(row)
             vec = model.get_word_vector(row)
             text.append(vec)
     text = np.array(text)
