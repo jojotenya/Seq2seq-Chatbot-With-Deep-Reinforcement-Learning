@@ -50,8 +50,8 @@ tf.app.flags.DEFINE_boolean('debug', True, 'debug')
 # schedule sampling
 tf.app.flags.DEFINE_string('schedule_sampling', 'linear', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
 tf.app.flags.DEFINE_float('sampling_decay_rate', 0.99 , 'schedule sampling decay rate')
-tf.app.flags.DEFINE_integer('sampling_global_step', 5000000, 'sampling_global_step')
-tf.app.flags.DEFINE_integer('sampling_decay_steps', 300, 'sampling_decay_steps')
+tf.app.flags.DEFINE_integer('sampling_global_step', 150000, 'sampling_global_step')
+tf.app.flags.DEFINE_integer('sampling_decay_steps', 500, 'sampling_decay_steps')
 tf.app.flags.DEFINE_boolean('reset_sampling_prob', False, 'reset_sampling_prob')
 # word segmentation type
 tf.app.flags.DEFINE_string('src_word_seg', 'word', 'source word segmentation type')
@@ -68,6 +68,7 @@ if FLAGS.pretrain_vec == 'None':
     FLAGS.pretrain_vec = None
 elif FLAGS.pretrain_vec == 'fasttext':
     FLAGS.pretrain_vec = hkl.load(fasttext_hkl)
+print('trainable: ',FLAGS.pretrain_trainable)
 
 # for data etl
 SEED = 112
