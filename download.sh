@@ -1,7 +1,8 @@
 # download jieba dictionary
 dict="dict.txt.zip","1jxdJOdPRy1HceAEVVr3cB8jlhXXxJ7PD"
+dict_fasttext="dict_fasttext.txt.gz","1jk6pjs535ujn4SQkK5GTwy_LWaLbyMto"
 
-files_arr=($dict)
+files_arr=($dict,$dict_fasttext)
 for f in ${files_arr[@]}; do
     IFS=',' read filename fileid <<< "${f}"
     curl -L -o "${filename}" "https://drive.google.com/uc?export=download&id=${fileid}"
