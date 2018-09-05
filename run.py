@@ -240,7 +240,8 @@ def test():
     import jieba
     jieba.initialize()
   sess = tf.Session()
-  vocab_dict, vocab_list = data_utils.read_map(FLAGS.source_data + '.' + str(FLAGS.src_vocab_size) + '.mapping')
+  src_vocab_dict, _ = data_utils.read_map(FLAGS.source_data + '.' + str(FLAGS.src_vocab_size) + '.mapping')
+  _ , trg_vocab_list = data_utils.read_map(FLAGS.target_data + '.' + str(FLAGS.trg_vocab_size) + '.mapping')
   model = create_seq2seq(sess, 'TEST')
   model.batch_size = 1
   
@@ -253,7 +254,7 @@ def test():
   elif FLAGS.src_word_seg == 'char':
     sentence = (' ').join([s for s in sentence])
   while(sentence):
-    token_ids = data_utils.convert_to_token(tf.compat.as_bytes(sentence), vocab_dict, False)
+    token_ids = data_utils.convert_to_token(tf.compat.as_bytes(sentence), src_vocab_dict, False)
     bucket_id = len(buckets) - 1
     for i, bucket in enumerate(buckets):
       if bucket[0] >= len(token_ids):
@@ -284,7 +285,7 @@ def test():
                 outputss.append(outputs)
     
             for i,outputs in enumerate(outputss):
-                sys_reply = "".join([tf.compat.as_str(vocab_list[output]) for output in outputs])
+                sys_reply = "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs])
                 sys_reply = data_utils.sub_words(sys_reply)
                 sys_reply = qulify_sentence(sys_reply)
                 if i == 0:
@@ -296,7 +297,7 @@ def test():
             outputs = [int(np.argmax(logit, axis=1)) for logit in output]
             if data_utils.EOS_ID in outputs:
               outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-            sys_reply = "".join([tf.compat.as_str(vocab_list[output]) for output in outputs])
+            sys_reply = "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs])
             sys_reply = data_utils.sub_words(sys_reply)
             sys_reply = qulify_sentence(sys_reply)
             print("Syetem reply(bs best): " + sys_reply)
@@ -310,14 +311,14 @@ def test():
         # If there is an EOS symbol in outputs, cut them at that point.
         if data_utils.EOS_ID in outputs:
           outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-        sys_reply = "".join([tf.compat.as_str(vocab_list[output]) for output in outputs])
+        sys_reply = "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs])
         sys_reply = data_utils.sub_words(sys_reply)
         sys_reply = qulify_sentence(sys_reply)
         print("Syetem reply(MLE): " + sys_reply)
 
 
     # Print out French sentence corresponding to outputs.
-    #print("Syetem reply: " + "".join([tf.compat.as_str(vocab_list[output]) for output in outputs]))
+    #print("Syetem reply: " + "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs]))
     print("User input  : ", end="")
     sys.stdout.flush()
     sentence = sys.stdin.readline()
