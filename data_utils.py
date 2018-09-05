@@ -4,7 +4,7 @@ from __future__ import division
 import re
 import sys
 #import nltk
-from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size
+from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size,_START_VOCAB,SPECIAL_TAGS_COUNT,PAD_ID,GO_ID,EOS_ID,UNK_ID
 import jieba
 import opencc
 import numpy as np
@@ -17,18 +17,6 @@ import subprocess
 WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
 DIGIT_RE = re.compile(br"\d")
 DU_RE = re.compile(b"\!")
-
-_PAD = b"PAD"
-_GO = b"GO"
-_EOS = b"EOS"
-_UNK = b"UNK"
-
-_START_VOCAB = [_PAD, _GO, _EOS, _UNK]
-
-PAD_ID = 0
-GO_ID = 1
-EOS_ID = 2
-UNK_ID = 3
 
 # Tokenize a sentence into a word list
 def tokenizer(sentence):

@@ -145,9 +145,17 @@ class Seq2seq():
       if pretrain_vec is not None: 
         pad_num = self.src_vocab_size - pretrain_vec.shape[0]
         pretrain_vec = np.pad(pretrain_vec, [(0, pad_num), (0, 0)], mode='constant')
-        embedding = tf.get_variable(name = "embedding", 
-                                    initializer = pretrain_vec,
-                                    trainable = self.pretrain_trainable)
+        tag_vec = pretrain_vec[:data_utils.SPECIAL_TAGS_COUNT]
+        pretrain_vec = pretrain_vec[data_utils.SPECIAL_TAGS_COUNT:]
+        special_tags = tf.get_variable(
+                name="special_tags",
+                initializer = tag_vec,
+                trainable = True)
+        embedding = tf.get_variable(
+                name = "embedding", 
+                initializer = pretrain_vec,
+                trainable = self.pretrain_trainable)
+        embedding = tf.concat([special_tags,embedding],0)
       else:
         embedding = tf.get_variable("embedding", [self.src_vocab_size, self.size])
       loop_function_RL = None
