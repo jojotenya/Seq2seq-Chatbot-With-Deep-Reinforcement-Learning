@@ -2,6 +2,7 @@ import tensorflow as tf
 import os
 import json
 import hickle as hkl 
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 src_vocab_size = 200000 
 trg_vocab_size = 6992 
@@ -96,3 +97,7 @@ PAD_ID = 0
 GO_ID = 1
 EOS_ID = 2
 UNK_ID = 3
+
+# word segmentation dictionary
+dict_path = 'dict_fasttext.txt'
+dict_path = os.path.join(dirname,dict_path)
