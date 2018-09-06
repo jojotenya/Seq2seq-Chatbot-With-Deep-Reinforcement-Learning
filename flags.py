@@ -17,6 +17,7 @@ fasttext_model = './cc.zh.300.bin'
 source_data = '%ssource'%corpus_dir
 target_data = '%starget'%corpus_dir
 source_mapping = '%s.%s.mapping'%(source_data,src_vocab_size)
+target_mapping = '%s.%s.mapping'%(target_data,trg_vocab_size)
 fasttext_hkl = '%sfasttext.hkl'%corpus_dir 
 if not os.path.exists(model_dir):
     print('create model dir: ',model_dir)
