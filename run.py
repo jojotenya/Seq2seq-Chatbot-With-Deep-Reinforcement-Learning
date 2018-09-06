@@ -13,7 +13,7 @@ import seq2seq_model
 from seq2seq import bernoulli_sampling
 from sentiment_analysis import run
 from sentiment_analysis import dataset
-from flags import FLAGS, SEED, buckets, replace_words, reset_prob 
+from flags import FLAGS, SEED, buckets, replace_words, reset_prob, source_mapping, target_mapping 
 from utils import qulify_sentence
 
 # mode variable has three different mode:
@@ -115,6 +115,7 @@ def train_MLE():
     step = 0
     loss = 0
     loss_list = []
+    perplexity_valid_min = float('Inf')
  
     if FLAGS.schedule_sampling:
       print('sampling_decay_steps: ',FLAGS.sampling_decay_steps)
@@ -128,6 +129,16 @@ def train_MLE():
       bucket_id = min([i for i in range(len(train_buckets_scale))
                          if train_buckets_scale[i] > random_number])
       encoder_input, decoder_input, weight = model.get_batch(d_train, bucket_id)
+      ''' debug
+      inds = [0,1,2,3,4,5] 
+      for ind in inds:
+          encoder_sent = [b[ind] for b in encoder_input]
+          decoder_sent = [b[ind] for b in decoder_input]
+          print('len of encoder_input: ',len(encoder_input))
+          print('encoder_input: ',encoder_sent,data_utils.token_to_text(encoder_sent,source_mapping))
+          print('decoder_input: ',decoder_sent,data_utils.token_to_text(decoder_sent,target_mapping))
+          print('-------------------------')
+      '''
       #print('batch_size: ',model.batch_size)      ==> 64
       #print('batch_size: ',len(encoder_input[0])) ==> 64
       #print('batch_size: ',len(encoder_input))    ==> 15,50,...
@@ -141,12 +152,18 @@ def train_MLE():
       #  print('sampling_probability: ',sess.run(model.sampling_probability))
         
       if step % FLAGS.check_step == 0:
-        print('Step %s, Training perplexity: %s, Learning rate: %s' % (step, math.exp(loss),
+        perplexity_train = np.exp(loss)
+        with open('%s/loss_train'%FLAGS.model_dir,'a') as f:
+          f.write('%s\n'%perplexity_train)
+        print('Step %s, Training perplexity: %s, Learning rate: %s' % (step, perplexity_train,
                                   sess.run(model.learning_rate))) 
+        perplexity_valids = []
         for i in range(len(d_train)):
           encoder_input, decoder_input, weight = model.get_batch(d_valid, i)
           loss_valid, _ = model.run(sess, encoder_input, decoder_input, weight, i, forward_only = True)
-          print('  Validation perplexity in bucket %s: %s' % (i, math.exp(loss_valid)))
+          perplexity_valid = np.exp(loss_valid)
+          print('  Validation perplexity in bucket %s: %s' % (i,perplexity_valid))
+          perplexity_valids.append(perplexity_valid)
         if len(loss_list) > 2 and loss > max(loss_list[-3:]):
           sess.run(model.learning_rate_decay)
         else:
@@ -157,9 +174,17 @@ def train_MLE():
         loss_list.append(loss)  
         loss = 0
 
-        checkpoint_path = os.path.join(FLAGS.model_dir, "MLE.ckpt")
-        model.saver.save(sess, checkpoint_path, global_step = step)
-        print('Saving model at step %s' % step)
+        perplexity_valids_mean = np.mean(perplexity_valids)
+        if perplexity_valids_mean < perplexity_valid_min: 
+          perplexity_valid_min = perplexity_valids_mean
+          print('perplexity_valid_min: ',perplexity_valid_min)
+          checkpoint_path = os.path.join(FLAGS.model_dir, "MLE.ckpt")
+          model.saver.save(sess, checkpoint_path, global_step = step)
+          print('Saving model at step %s' % step)
+        with open('%s/loss_val'%FLAGS.model_dir,'a') as f:
+          for perplexity_valid in perplexity_valids:
+            f.write('%s\n'%perplexity_valid)
+          f.write('-----------------\n')
       if step == FLAGS.sampling_global_step: break
 
 def train_RL():
