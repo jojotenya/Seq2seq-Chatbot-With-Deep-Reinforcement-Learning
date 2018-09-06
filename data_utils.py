@@ -196,6 +196,19 @@ def read_token_data(file_path):
   else:
     raise ValueError("Can not find token file %s" % token_path)
 
+def token_to_text(ids,mapping):
+    with open(mapping,'r') as f:
+        mapping = [row.strip() for row in f.readlines()]
+    mapping = np.array(mapping)
+    if isinstance(ids,list):
+        ids = np.array(ids)
+    elif isinstance(ids,str):
+        ids = int(ids)
+        ids = np.array([ids])
+    elif isinstance(ids,int):
+        ids = np.array([ids])
+    return mapping[ids]
+
 def sub_words(word):
     for rep in replace_words.keys():
         if rep in word:
