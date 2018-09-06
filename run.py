@@ -6,7 +6,7 @@ import os
 import sys 
 sys.path.append('sentiment_analysis/')
 import math
-from termcolor import colored
+#from termcolor import colored
 
 import data_utils
 import seq2seq_model
@@ -287,7 +287,8 @@ def test():
                 sys_reply = data_utils.sub_words(sys_reply)
                 sys_reply = qulify_sentence(sys_reply)
                 if i == 0:
-                    print(colored("Syetem reply(bs best): " + sys_reply,"red"))
+                    #print(colored("Syetem reply(bs best): " + sys_reply,"red"))
+                    print("Syetem reply(bs best): " + sys_reply,"red")
                 else:
                     print("Syetem reply(bs all): " + sys_reply)
         else:
