@@ -6,10 +6,13 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 
 src_vocab_size = 200000 
 trg_vocab_size = 6992 
+# ptt only
+src_vocab_size = 150000 
+trg_vocab_size = 6185 
 hidden_size = 300 
 num_layers = 4 
 batch_size = 32
-dir_base = 'xhj_ptt_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
+dir_base = 'ptt_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
 model_dir = 'model/%s/'%dir_base 
 model_RL_dir = 'model_RL/%s/'%dir_base
 corpus_dir = 'corpus/%s/'%dir_base
