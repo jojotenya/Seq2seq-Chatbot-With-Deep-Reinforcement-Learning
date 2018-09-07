@@ -110,7 +110,8 @@ def train_MLE():
       with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
         sess.run(tf.assign(model.sampling_probability,reset_prob))
     if FLAGS.schedule_sampling:
-      FLAGS.keep_best_model = False
+      if not FLAGS.keep_best_model:
+        FLAGS.keep_best_model = False
       print('model.sampling_probability: ',model.sampling_probability_clip)
     #sess.run(tf.assign(model.sampling_probability,1.0))
     step = 0
