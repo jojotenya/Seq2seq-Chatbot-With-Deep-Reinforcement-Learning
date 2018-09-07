@@ -6,10 +6,14 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 
 src_vocab_size = 200000 
 trg_vocab_size = 6992 
+# for xhj
+src_vocab_size = 72255 
+trg_vocab_size = 5348 
 hidden_size = 300 
 num_layers = 4 
 batch_size = 32
 dir_base = 'xhj_ptt_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
+dir_base = 'xhj_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
 model_dir = 'model/%s/'%dir_base 
 model_RL_dir = 'model_RL/%s/'%dir_base
 corpus_dir = 'corpus/%s/'%dir_base
@@ -49,6 +53,8 @@ tf.app.flags.DEFINE_float('state_keep_prob', '1.0', 'step state dropout of savin
 # beam search
 tf.app.flags.DEFINE_boolean('beam_search', False, 'beam search')
 tf.app.flags.DEFINE_integer('beam_size', 10 , 'beam size')
+tf.app.flags.DEFINE_string('length_penalty', 'penalty', 'length penalty type')
+tf.app.flags.DEFINE_float('length_penalty_factor', 0.6, 'length penalty factor')
 tf.app.flags.DEFINE_boolean('debug', True, 'debug')
 # schedule sampling
 tf.app.flags.DEFINE_string('schedule_sampling', 'linear', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
@@ -65,7 +71,7 @@ tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable
 
 FLAGS = tf.app.flags.FLAGS
 
-if FLAGS.schedule_sampling == 'False': 
+if FLAGS.schedule_sampling == 'False' or FLAGS.schedule_sampling == 'None': 
     FLAGS.schedule_sampling = False
 if FLAGS.pretrain_vec == 'None': 
     FLAGS.pretrain_vec = None
@@ -76,7 +82,7 @@ print('trainable: ',FLAGS.pretrain_trainable)
 # for data etl
 SEED = 112
 buckets = [(10, 10), (15, 15), (25, 25), (50, 50)]
-split_ratio = 0.9975
+split_ratio = 0.995
 
 # for inference filter dirty words
 with open('replace_words.json','r') as f:

@@ -37,6 +37,8 @@ class Seq2seq():
                sampling_decay_steps=500,
                pretrain_vec = None,
                pretrain_trainable = False,
+               length_penalty = None,
+               length_penalty_factor = 0.6 
                ):
     
     self.src_vocab_size = src_vocab_size
@@ -68,6 +70,8 @@ class Seq2seq():
     # beam search
     self.beam_search = beam_search
     self.beam_size = beam_size
+    self.length_penalty = length_penalty
+    self.length_penalty_factor = length_penalty_factor
 
     # if load pretrain word vector
     self.pretrain_vec = pretrain_vec
@@ -206,7 +210,9 @@ class Seq2seq():
              beam_size = self.beam_size,
              loop = loop_function_RL,
              schedule_sampling = self.schedule_sampling,
-             sampling_probability = self.sampling_probability_clip)
+             sampling_probability = self.sampling_probability_clip,
+             length_penalty = self.length_penalty,
+             length_penalty_factor = self.length_penalty_factor)
     
     # inputs
     self.encoder_inputs = []
