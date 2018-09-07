@@ -843,7 +843,7 @@ def length_penalty(sequence_lengths, penalty_type='penalty', penalty_factor=0.6)
     if penalty_type == 'penalty':
         return tf.div((5. + 1.)**penalty_factor, (5. + tf.to_float(sequence_lengths))**penalty_factor)
     elif penalty_type == 'rerank':
-        return sequence_lengths
+        return tf.cast(sequence_lengths,tf.float32)
 
 
 def cal_length_penalty(log_probs, sequence_lengths, penalty_type='penalty', penalty_factor=0.6):
