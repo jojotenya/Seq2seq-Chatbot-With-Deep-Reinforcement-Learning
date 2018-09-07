@@ -73,6 +73,8 @@ FLAGS = tf.app.flags.FLAGS
 
 if FLAGS.schedule_sampling == 'False' or FLAGS.schedule_sampling == 'None': 
     FLAGS.schedule_sampling = False
+if FLAGS.length_penalty == 'False' or FLAGS.length_penalty == 'None':
+    FLAGS.length_penalty = None
 if FLAGS.pretrain_vec == 'None': 
     FLAGS.pretrain_vec = None
 elif FLAGS.pretrain_vec == 'fasttext':
