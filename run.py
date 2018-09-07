@@ -27,6 +27,8 @@ def create_seq2seq(session, mode):
   else:
     FLAGS.beam_search = False
   print('FLAGS.beam_search: ',FLAGS.beam_search)
+  print('FLAGS.length_penalty: ',FLAGS.length_penalty)
+  print('FLAGS.length_penalty_factor: ',FLAGS.length_penalty_factor)
   if FLAGS.beam_search:
     print('FLAGS.beam_size: ',FLAGS.beam_size)
     print('FLAGS.debug: ',bool(FLAGS.debug))
@@ -48,7 +50,9 @@ def create_seq2seq(session, mode):
                                 sampling_global_step = FLAGS.sampling_global_step,
                                 sampling_decay_steps = FLAGS.sampling_decay_steps,
                                 pretrain_vec = FLAGS.pretrain_vec,
-                                pretrain_trainable = FLAGS.pretrain_trainable
+                                pretrain_trainable = FLAGS.pretrain_trainable,
+                                length_penalty = FLAGS.length_penalty,
+                                length_penalty_factor = FLAGS.length_penalty_factor
                                 )
   
   #if mode != 'TEST':

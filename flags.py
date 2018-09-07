@@ -6,6 +6,9 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 
 src_vocab_size = 200000 
 trg_vocab_size = 6992 
+# for xhj
+src_vocab_size = 72255 
+trg_vocab_size = 5348 
 # ptt only
 src_vocab_size = 150000 
 trg_vocab_size = 6185 
@@ -52,12 +55,14 @@ tf.app.flags.DEFINE_float('state_keep_prob', '1.0', 'step state dropout of savin
 # beam search
 tf.app.flags.DEFINE_boolean('beam_search', False, 'beam search')
 tf.app.flags.DEFINE_integer('beam_size', 10 , 'beam size')
+tf.app.flags.DEFINE_string('length_penalty', 'penalty', 'length penalty type')
+tf.app.flags.DEFINE_float('length_penalty_factor', 0.6, 'length penalty factor')
 tf.app.flags.DEFINE_boolean('debug', True, 'debug')
 # schedule sampling
 tf.app.flags.DEFINE_string('schedule_sampling', 'linear', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
 tf.app.flags.DEFINE_float('sampling_decay_rate', 0.99 , 'schedule sampling decay rate')
-tf.app.flags.DEFINE_integer('sampling_global_step', 10000000, 'sampling_global_step')
-tf.app.flags.DEFINE_integer('sampling_decay_steps', 300, 'sampling_decay_steps')
+tf.app.flags.DEFINE_integer('sampling_global_step', 150000, 'sampling_global_step')
+tf.app.flags.DEFINE_integer('sampling_decay_steps', 500, 'sampling_decay_steps')
 tf.app.flags.DEFINE_boolean('reset_sampling_prob', False, 'reset_sampling_prob')
 # word segmentation type
 tf.app.flags.DEFINE_string('src_word_seg', 'word', 'source word segmentation type')
@@ -68,17 +73,18 @@ tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable
 
 FLAGS = tf.app.flags.FLAGS
 
-if FLAGS.schedule_sampling == 'False': 
+if FLAGS.schedule_sampling == 'False' or FLAGS.schedule_sampling == 'None': 
     FLAGS.schedule_sampling = False
 if FLAGS.pretrain_vec == 'None': 
     FLAGS.pretrain_vec = None
 elif FLAGS.pretrain_vec == 'fasttext':
     FLAGS.pretrain_vec = hkl.load(fasttext_hkl)
+print('trainable: ',FLAGS.pretrain_trainable)
 
 # for data etl
 SEED = 112
 buckets = [(10, 10), (15, 15), (25, 25), (50, 50)]
-split_ratio = 0.9975
+split_ratio = 0.995
 
 # for inference filter dirty words
 with open('replace_words.json','r') as f:
