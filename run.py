@@ -110,6 +110,7 @@ def train_MLE():
       with tf.variable_scope('sampling_prob',reuse=tf.AUTO_REUSE):
         sess.run(tf.assign(model.sampling_probability,reset_prob))
     if FLAGS.schedule_sampling:
+      FLAGS.keep_best_model = False
       print('model.sampling_probability: ',model.sampling_probability_clip)
     #sess.run(tf.assign(model.sampling_probability,1.0))
     step = 0
@@ -174,10 +175,15 @@ def train_MLE():
         loss_list.append(loss)  
         loss = 0
 
-        perplexity_valids_mean = np.mean(perplexity_valids)
-        if perplexity_valids_mean < perplexity_valid_min: 
-          perplexity_valid_min = perplexity_valids_mean
-          print('perplexity_valid_min: ',perplexity_valid_min)
+        if FLAGS.keep_best_model:
+          perplexity_valids_mean = np.mean(perplexity_valids)
+          if perplexity_valids_mean < perplexity_valid_min: 
+            perplexity_valid_min = perplexity_valids_mean
+            print('perplexity_valid_min: ',perplexity_valid_min)
+            checkpoint_path = os.path.join(FLAGS.model_dir, "MLE.ckpt")
+            model.saver.save(sess, checkpoint_path, global_step = step)
+            print('Saving model at step %s' % step)
+        else:
           checkpoint_path = os.path.join(FLAGS.model_dir, "MLE.ckpt")
           model.saver.save(sess, checkpoint_path, global_step = step)
           print('Saving model at step %s' % step)
@@ -185,7 +191,8 @@ def train_MLE():
           for perplexity_valid in perplexity_valids:
             f.write('%s\n'%perplexity_valid)
           f.write('-----------------\n')
-      if step == FLAGS.sampling_global_step: break
+      if FLAGS.schedule_sampling:
+        if step == FLAGS.sampling_global_step: break
 
 def train_RL():
   g1 = tf.Graph()

@@ -40,6 +40,7 @@ tf.app.flags.DEFINE_string('target_data', target_data, 'file of target')
 tf.app.flags.DEFINE_string('model_dir', model_dir, 'directory of model')
 tf.app.flags.DEFINE_string('model_rl_dir',model_RL_dir, 'directory of RL model')
 tf.app.flags.DEFINE_integer('check_step', '500', 'step interval of saving model')
+tf.app.flags.DEFINE_boolean('keep_best_model', True, 'if performance of validation set not gonna be better, then forgo the model')
 # for rnn dropout
 tf.app.flags.DEFINE_float('input_keep_prob', '1.0', 'step input dropout of saving model')
 tf.app.flags.DEFINE_float('output_keep_prob', '1.0', 'step output dropout of saving model')
