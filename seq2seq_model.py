@@ -471,7 +471,7 @@ class Seq2seq():
       #print(reward)
       # advantage
       reward = reward - np.mean(reward)
-      _, decoder_inputs, target_weights = self.get_batch({bucket_id: new_data}, bucket_id, order = True)
+      _, decoder_inputs, target_weights = self.get_batch({bucket_id: new_data}, bucket_id, rand = False)
 
       # step 3: update seq2seq model
       for l in range(decoder_size):
@@ -487,7 +487,7 @@ class Seq2seq():
       return outputs[0]
 
 
-  def get_batch(self, data, bucket_id, rand = True, order = False):
+  def get_batch(self, data, bucket_id, rand = True, initial_id=0):
     # data should be [whole_data_length x (source, target)] 
     # decoder_input should contain "GO" symbol and target should contain "EOS" symbol
     encoder_size, decoder_size = self.buckets[bucket_id]
@@ -500,8 +500,8 @@ class Seq2seq():
     for i in range(self.batch_size):
       if rand:
         encoder_input, decoder_input = random.choice(data[bucket_id])
-      if order:
-        encoder_input, decoder_input = data[bucket_id][i]
+      else:
+        encoder_input, decoder_input = data[bucket_id][i+initial_id]
         c += 1 
 
       encoder_pad = [data_utils.PAD_ID] * (encoder_size - len(encoder_input))
