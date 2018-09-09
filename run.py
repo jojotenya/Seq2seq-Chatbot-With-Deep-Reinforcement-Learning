@@ -272,13 +272,71 @@ def train_RL():
       print('Saving model at step %s' % step)
 
 
+def inference(model,output,src_vocab_dict,trg_vocab_dict,debug=FLAGS.debug,verbose=True):
+    print('output: ',type(output),len(output),type(output[0]),output[0].shape,output[0],np.sum(output[0]))
+    # beam search all
+    if bool(model.beam_search):
+        if bool(debug):
+            outs = []
+            for _ in range(model.beam_size):
+                outs.append([])
+    
+            for out in output:
+                for i,o in enumerate(out):
+                    outs[i].append(o)
+            outs = np.array(outs)
+            #print('outs: ',outs.shape)
+            outputss = []
+            for out in outs:
+                #print('out: ',out.shape)
+                outputs = [int(np.argmax(logit)) for logit in out]
+                outputss.append(outputs)
+    
+            sys_replys = [] 
+            for i,outputs in enumerate(outputss):
+                sys_reply = "".join([tf.compat.as_str(trg_vocab_dict[output]) for output in outputs])
+                sys_reply = data_utils.sub_words(sys_reply)
+                sys_reply = qulify_sentence(sys_reply)
+                if i == 0:
+                    if verbose:
+                        print(colored("Syetem reply(bs best): " + sys_reply,"red"))
+                else:
+                    if verbose:
+                        print("Syetem reply(bs all): " + sys_reply)
+                sys_replys.append(sys_reply)
+            return sys_replys 
+
+        else:
+            outputs = [int(np.argmax(logit, axis=1)) for logit in output]
+            if data_utils.EOS_ID in outputs:
+              outputs = outputs[:outputs.index(data_utils.EOS_ID)]
+            sys_reply = "".join([tf.compat.as_str(trg_vocab_dict[output]) for output in outputs])
+            sys_reply = data_utils.sub_words(sys_reply)
+            sys_reply = qulify_sentence(sys_reply)
+            if verbose:
+                print("Syetem reply(bs best): " + sys_reply)
+    # MLE
+    else:
+        if verbose:
+            print('output: ', len(output), output[0].shape)
+        outputs = [int(np.argmax(logit, axis=1)) for logit in output]
+        # If there is an EOS symbol in outputs, cut them at that point.
+        if data_utils.EOS_ID in outputs:
+          outputs = outputs[:outputs.index(data_utils.EOS_ID)]
+        sys_reply = "".join([tf.compat.as_str(trg_vocab_dict[output]) for output in outputs])
+        sys_reply = data_utils.sub_words(sys_reply)
+        sys_reply = qulify_sentence(sys_reply)
+        if verbose:
+            print("Syetem reply(MLE): " + sys_reply)
+    return sys_reply
+
 def test():
   if FLAGS.src_word_seg == 'word':
     import jieba
     jieba.initialize()
   sess = tf.Session()
-  src_vocab_dict, _ = data_utils.read_map(FLAGS.source_data + '.' + str(FLAGS.src_vocab_size) + '.mapping')
-  _ , trg_vocab_list = data_utils.read_map(FLAGS.target_data + '.' + str(FLAGS.trg_vocab_size) + '.mapping')
+  src_vocab_dict, _ = data_utils.read_map(source_mapping)
+  _ , trg_vocab_dict = data_utils.read_map(target_mapping)
   model = create_seq2seq(sess, 'TEST')
   model.batch_size = 1
   
@@ -303,59 +361,9 @@ def test():
     output = model.run(sess, encoder_input, decoder_input, weight, bucket_id)
     # This is a greedy decoder - outputs are just argmaxes of output_logits.
     
-    # beam search all
-    if bool(model.beam_search) is True:
-        if bool(FLAGS.debug):
-            outs = []
-            for _ in range(model.beam_size):
-                outs.append([])
-   
-            for out in output:
-                for i,o in enumerate(out):
-                    outs[i].append(o)
-            outs = np.array(outs)
-            #print('outs: ',outs.shape)
-            outputss = []
-            for out in outs:
-                #print('out: ',out.shape)
-                outputs = [int(np.argmax(logit)) for logit in out]
-                outputss.append(outputs)
-    
-            for i,outputs in enumerate(outputss):
-                sys_reply = "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs])
-                sys_reply = data_utils.sub_words(sys_reply)
-                sys_reply = qulify_sentence(sys_reply)
-                if i == 0:
-                    print(colored("Syetem reply(bs best): " + sys_reply,"red"))
-                else:
-                    print("Syetem reply(bs all): " + sys_reply)
-        else:
-            output = model.run(sess, encoder_input, decoder_input, weight, bucket_id)
-            outputs = [int(np.argmax(logit, axis=1)) for logit in output]
-            if data_utils.EOS_ID in outputs:
-              outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-            sys_reply = "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs])
-            sys_reply = data_utils.sub_words(sys_reply)
-            sys_reply = qulify_sentence(sys_reply)
-            print("Syetem reply(bs best): " + sys_reply)
-            
-
-    # MLE
-    else:
-        output = model.run(sess, encoder_input, decoder_input, weight, bucket_id)
-        print('output: ', len(output), output[0].shape)
-        outputs = [int(np.argmax(logit, axis=1)) for logit in output]
-        # If there is an EOS symbol in outputs, cut them at that point.
-        if data_utils.EOS_ID in outputs:
-          outputs = outputs[:outputs.index(data_utils.EOS_ID)]
-        sys_reply = "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs])
-        sys_reply = data_utils.sub_words(sys_reply)
-        sys_reply = qulify_sentence(sys_reply)
-        print("Syetem reply(MLE): " + sys_reply)
-
-
+    inference(model,output,src_vocab_dict,trg_vocab_dict)
     # Print out French sentence corresponding to outputs.
-    #print("Syetem reply: " + "".join([tf.compat.as_str(trg_vocab_list[output]) for output in outputs]))
+    #print("Syetem reply: " + "".join([tf.compat.as_str(trg_vocab_dict[output]) for output in outputs]))
     print("User input  : ", end="")
     sys.stdout.flush()
     sentence = sys.stdin.readline()

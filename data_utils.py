@@ -15,6 +15,7 @@ from tensorflow.python.platform import gfile
 import subprocess
 
 WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
+WORD_SPLIT = re.compile(b"")
 DIGIT_RE = re.compile(br"\d")
 DU_RE = re.compile(b"\!")
 

@@ -841,7 +841,7 @@ def length_penalty(sequence_lengths, penalty_type='penalty', penalty_factor=0.6)
       The length penalty factor, a tensor fo shape [beam_size].
     """
     if penalty_type == 'penalty':
-        return tf.div((5. + 1.)**penalty_factor, (5. + tf.to_float(sequence_lengths))**penalty_factor)
+        return tf.div((5. + tf.to_float(sequence_lengths))**penalty_factor,(5. + 1.)**penalty_factor)
     elif penalty_type == 'rerank':
         return tf.cast(sequence_lengths,tf.float32)
 

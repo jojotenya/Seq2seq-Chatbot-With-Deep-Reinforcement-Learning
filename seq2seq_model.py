@@ -494,15 +494,17 @@ class Seq2seq():
     encoder_inputs, decoder_inputs = [], []
 
     # data[bucket_id] == [(incoder_inp_list,decoder_inp_list),...]
-    encoder_input, decoder_input = random.choice(data[bucket_id])
-    c = 0
 
-    for i in range(self.batch_size):
+    data_len = len(data[bucket_id])
+    if data_len >= self.batch_size:
+        data_range = self.batch_size
+    else:
+        data_range = data_len
+    for i in range(data_range):
       if rand:
         encoder_input, decoder_input = random.choice(data[bucket_id])
       else:
         encoder_input, decoder_input = data[bucket_id][i+initial_id]
-        c += 1 
 
       encoder_pad = [data_utils.PAD_ID] * (encoder_size - len(encoder_input))
       encoder_inputs.append(list(reversed(encoder_input + encoder_pad)))
@@ -514,14 +516,14 @@ class Seq2seq():
 
     for length_idx in range(encoder_size):
       batch_encoder_inputs.append(np.array([encoder_inputs[batch_idx][length_idx]
-                                  for batch_idx in range(self.batch_size)], dtype = np.int32))
+                                  for batch_idx in range(data_range)], dtype = np.int32))
 
     for length_idx in range(decoder_size):
       batch_decoder_inputs.append(np.array([decoder_inputs[batch_idx][length_idx]
-                                  for batch_idx in range(self.batch_size)], dtype = np.int32))
+                                  for batch_idx in range(data_range)], dtype = np.int32))
 
-      batch_weight = np.ones(self.batch_size, dtype = np.float32)
-      for batch_idx in range(self.batch_size):
+      batch_weight = np.ones(data_range, dtype = np.float32)
+      for batch_idx in range(data_range):
         # We set weight to 0 if the corresponding target is a PAD symbol.
         # The corresponding target is decoder_input shifted by 1 forward.
         if length_idx < decoder_size - 1:
