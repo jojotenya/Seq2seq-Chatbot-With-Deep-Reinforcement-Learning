@@ -106,9 +106,6 @@ def get_output_dfs_per_model(model_dict,params,use_current_model=False,export_ea
     print('fasttext_hkl: ',fasttext_hkl)
     print('########################################################################')
 
-    src_vocab_dict, _ = data_utils.read_map(source_mapping)
-    _ , trg_vocab_dict = data_utils.read_map(target_mapping)
-
     d_valid = data_utils.read_data(source_data + '_val.token',target_data + '_val.token',buckets)  
 
     dfs = []
@@ -129,18 +126,13 @@ def get_output_dfs_per_model(model_dict,params,use_current_model=False,export_ea
     dfs = pd.DataFrame(dfs)
     dfs = [dfs]
     
-    with open(source_data + '_val.token' , 'r') as f:
-        token_ids_list = []
-        for i, row in enumerate(f.readlines()):
-            if i > 1: break
-            token_ids_list.append(row.strip().split(' '))
-    
+    src_vocab_dict, _ = data_utils.read_map(source_mapping)
+    _ , trg_vocab_dict = data_utils.read_map(target_mapping)
+    params = get_all_products(params)
     tf.reset_default_graph()
     with tf.Session() as sess:
-        vocab_dict, vocab_list = data_utils.read_map(source_mapping)
         model = create_seq2seq(sess, 'TEST')
         model.batch_size = batch_size 
-        params = get_all_products(params)
         for param in params:
             print('param: ', param)
             df = get_output_df(sess,param,d_valid,model,src_vocab_dict,trg_vocab_dict)
@@ -170,14 +162,21 @@ def get_all_products(params):
     
 def get_output_df(sess,param,d_valid,model,src_vocab_dict,trg_vocab_dict):
     if param['beam_search']:
+        FLAGS.beam_search = True
+        FLAGS.beam_size = param['beam_size'] 
         if param['length_penalty']:
             if param['length_penalty'] == 'rerank':
+                FLAGS.length_penalty = 'rerank' 
                 title = 'beam%s_%s'%(param['beam_size'],param['length_penalty'])
             elif param['length_penalty'] == 'penalty':
+                FLAGS.length_penalty = 'penalty' 
+                FLAGS.length_penalty_factor = param['length_penalty_factor'] 
                 title = 'beam%s_%s_%s'%(param['beam_size'],param['length_penalty'],param['length_penalty_factor'])
         else:
+            FLAGS.length_penalty = None 
             title = 'beam%s'%(param['beam_size'])
     else:
+        FLAGS.beam_search = False 
         title = 'greedy'
 
     if '-' in title: title = re.sub('-','N',title) 
