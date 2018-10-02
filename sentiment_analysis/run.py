@@ -6,9 +6,9 @@ import sys
 import numpy as np
 sys.path.append('../sentiment_analysis/')
 import dataset
-#from . import model
-import model
-from settings import *
+from . import model
+#import model
+from .settings import *
 
 def sentence_cutter(sentence):
     sentence = [s for s in sentence]

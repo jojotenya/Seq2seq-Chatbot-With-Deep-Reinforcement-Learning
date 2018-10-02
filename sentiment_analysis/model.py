@@ -3,6 +3,8 @@ import dataset
 import numpy as np
 import random
 import tensorflow as tf
+import os
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 class discriminator():
 
@@ -114,7 +116,7 @@ class discriminator():
       self.opt = tf.train.AdamOptimizer().minimize(self.loss)
     else:
       #self.vocab_map, _ = dataset.read_map('sentiment_analysis/corpus/mapping')
-      self.vocab_map, _ = dataset.read_map('./corpus/mapping')
+      self.vocab_map, _ = dataset.read_map(os.path.join(dirname,'corpus/mapping'))
 
   def step(self, session, encoder_inputs, seq_length, target = None):
     input_feed = {}
