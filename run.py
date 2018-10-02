@@ -210,7 +210,7 @@ def train_RL():
   with g1.as_default():
     model = create_seq2seq(sess1, 'RL')
     # we set sample size = ?
-    model.batch_size = 5
+    model.batch_size = 64 
   # model_LM is for a reward function (language model)
   with g2.as_default():
     model_LM = create_seq2seq(sess2, 'MLE')
@@ -228,13 +228,14 @@ def train_RL():
   def SA(sentence, encoder_length):
     sentence = ' '.join(sentence)
     token_ids = dataset.convert_to_token(sentence, model_SA.vocab_map)
+    print('sentence: ',sentence)
+    print('token_ids: ',token_ids)
     encoder_input, encoder_length, _ = model_SA.get_batch([(0, token_ids)])
     return model_SA.step(sess3, encoder_input, encoder_length)[0][0]
 
   '''
   data_utils.prepare_whole_data(FLAGS.source_data, FLAGS.target_data, FLAGS.src_vocab_size, FLAGS.trg_vocab_size)
   d = data_utils.read_data(FLAGS.source_data + '.token', FLAGS.target_data + '.token', buckets)
-  '''
 
   d = data_utils.read_data(FLAGS.source_data + '_train.token',FLAGS.target_data + '_train.token',buckets)
 
@@ -242,9 +243,15 @@ def train_RL():
   train_total_size = float(sum(train_bucket_sizes))
   train_buckets_scale = [sum(train_bucket_sizes[:i + 1]) / train_total_size
                          for i in range(len(train_bucket_sizes))]
+  '''
+  d_train = data_utils.read_data(FLAGS.source_data + '_train.token',FLAGS.target_data + '_train.token',buckets)
+  train_bucket_sizes = [len(d_train[b]) for b in range(len(d_train))]
+  train_total_size = float(sum(train_bucket_sizes))
+  train_buckets_scale = [sum(train_bucket_sizes[:i + 1]) / train_total_size
+                         for i in range(len(train_bucket_sizes))]
 
   # make RL object read vocab mapping dict, list  
-  model.RL_readmap(FLAGS.source_data + '.' + str(FLAGS.src_vocab_size) + '.mapping')
+  model.RL_readmap(src_map_path=source_mapping,trg_map_path=target_mapping)
   step = 0
   while(True):
     step += 1
@@ -252,11 +259,18 @@ def train_RL():
     random_number = np.random.random_sample()
     bucket_id = min([i for i in range(len(train_buckets_scale))
                        if train_buckets_scale[i] > random_number])
+    print('step: ',step)
+    print('bucket_id: ',bucket_id)
     
     # the same encoder_input for sampling batch_size times
     #encoder_input, decoder_input, weight = model.get_batch(d, bucket_id, rand = False)    
-    encoder_input, decoder_input, weight = model.get_batch(d, bucket_id, rand = False)    
+    encoder_input, decoder_input, weight = model.get_batch(d_train, bucket_id, rand = False)    
+    print('encoder_input: ',len(encoder_input[0]))
+    print('decoder_input: ',len(decoder_input[0]))
+    print('batch_size: ',model.batch_size)
     loss = model.run(sess1, encoder_input, decoder_input, weight, bucket_id, X = LM, Y = SA)
+    print('Loss: %s' %loss)
+    print('====================')
    
     # debug 
     #encoder_input = np.reshape(np.transpose(encoder_input, (1, 0, 2)), (-1, FLAGS.vocab_size))
@@ -267,7 +281,7 @@ def train_RL():
     
     if step % FLAGS.check_step == 0:
       print('Loss at step %s: %s' % (step, loss))
-      checkpoint_path = os.path.join('model_RL', "RL.ckpt")
+      checkpoint_path = os.path.join(FLAGS.model_rl_dir, "RL.ckpt")
       model.saver.save(sess1, checkpoint_path, global_step = step)
       print('Saving model at step %s' % step)
 

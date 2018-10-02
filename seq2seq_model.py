@@ -327,7 +327,7 @@ class Seq2seq():
         sentence_list[i] = sentence_list[i][:sentence_list[i].index(data_utils.EOS_ID)]
       if data_utils.PAD_ID in sentence_list[i]:
         sentence_list[i] = sentence_list[i][:sentence_list[i].index(data_utils.PAD_ID)]
-      sentence_temp = [tf.compat.as_str(self.vocab_list[output]) for output in sentence_list[i]]  
+      sentence_temp = [tf.compat.as_str(self.src_vocab_list[output]) for output in sentence_list[i]]  
       sentence_list[i] = " ".join(word for word in sentence_temp)
     return sentence_list
 
@@ -371,8 +371,9 @@ class Seq2seq():
     return r
 
   # this function is specify for training of Reinforcement Learning case
-  def RL_readmap(self, map_path):
-    self.vocab_dict, self.vocab_list = data_utils.read_map(map_path)
+  def RL_readmap(self, src_map_path, trg_map_path):
+    _, self.src_vocab_list = data_utils.read_map(src_map_path)
+    _, self.trg_vocab_list = data_utils.read_map(trg_map_path)
 
   def run(self, sess, encoder_inputs, decoder_inputs, target_weights,
           bucket_id, forward_only = False, X = None, Y = None):
@@ -440,7 +441,7 @@ class Seq2seq():
         '''
         # in this case, X is language model score
         # reward 1: ease of answering
-        temp_reward = [self.prob(token_ids, data_utils.convert_to_token(tf.compat.as_bytes(sen), self.vocab_dict,
+        temp_reward = [self.prob(token_ids, data_utils.convert_to_token(tf.compat.as_bytes(sen), self.trg_vocab_dict,
                        False) + [data_utils.EOS_ID], X, bucket_id)/float(len(sen)) for sen in self.dummy_reply]
 
         r1 = -np.mean(temp_reward)
@@ -453,21 +454,25 @@ class Seq2seq():
         r2 = self.prob(r_input, token_ids, X, bucket_id) / float(len(token_ids)) if len(token_ids) != 0 else 0
 
         # reward 3: sentiment analysis score
-        #print('self.vocablist:' ,len(self.vocab_list))
+        #print('self.vocablist:' ,len(self.trg_vocab_list))
         #print('token_ids: ',token_ids)
+        ''' 
         word_token = []
         for token in token_ids:
-            if token in self.vocab_list:
-                word_token.append(self.vocab_list[token].decode('utf-8'))
-        #word_token = [self.vocab_list[token].decode('utf-8') for token in token_ids]
+            word = self.trg_vocab_list[token]
+            if word in self.trg_vocab_list:
+                word_token.append(word.decode('utf-8'))
+        ''' 
+        word_token = [self.trg_vocab_list[token].decode('utf-8') for token in token_ids]
         r3 = Y(word_token, np.array([len(token_ids)], dtype = np.int32))
         '''
         print('r1: %s' % r1)
+        '''
         print('r2: %s' % r2)
         print('r3: %s' % r3)
-        '''
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3
-        reward[i] = 0 * r2 + r3
+        #reward[i] = 0 * r2 + r3
+        reward[i] = 0.7 * r2 + r3
       #print(reward)
       # advantage
       reward = reward - np.mean(reward)
