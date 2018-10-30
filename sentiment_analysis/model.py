@@ -3,6 +3,8 @@ import dataset
 import numpy as np
 import random
 import tensorflow as tf
+import os
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 class discriminator():
 
@@ -31,7 +33,7 @@ class discriminator():
     self.build_model()
     self.saver = tf.train.Saver(max_to_keep = 2)
 
-  def build_model(self,typ='cnn'):
+  def build_model(self,typ='rnn_last'):
     self.model_type[typ]()
 
   def build_model_cnn(self):
@@ -114,7 +116,7 @@ class discriminator():
       self.opt = tf.train.AdamOptimizer().minimize(self.loss)
     else:
       #self.vocab_map, _ = dataset.read_map('sentiment_analysis/corpus/mapping')
-      self.vocab_map, _ = dataset.read_map('./corpus/mapping')
+      self.vocab_map, _ = dataset.read_map(os.path.join(dirname,'corpus/mapping'))
 
   def step(self, session, encoder_inputs, seq_length, target = None):
     input_feed = {}
@@ -160,7 +162,8 @@ class discriminator():
         encoder_inputs.append(pair[1][:self.max_length])
         encoder_length.append(self.max_length)
       else:
-        encoder_pad = [dataset.PAD_ID] * (self.max_length - length)
+        #encoder_pad = [dataset.PAD_ID] * (self.max_length - length)
+        encoder_pad = [dataset.EOS_ID] * (self.max_length - length)
         encoder_inputs.append(pair[1] + encoder_pad)
         encoder_length.append(length)
 

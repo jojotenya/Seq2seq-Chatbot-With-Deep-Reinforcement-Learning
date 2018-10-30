@@ -1,5 +1,7 @@
 import csv
 import re
+import os
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 WORD_SPLIT = re.compile("([.,!?\"':;)(])")
 DIGIT_RE = re.compile(r"\d")
@@ -12,10 +14,14 @@ _UNK = "UNK"
 
 _START_VOCAB = [_PAD, _GO, _EOS, _UNK]
 
-PAD_ID = 0
-GO_ID = 1
-EOS_ID = 2
-UNK_ID = 3
+#PAD_ID = 0
+#GO_ID = 1
+#EOS_ID = 2
+#UNK_ID = 3
+#PAD_ID = 50001 
+GO_ID = 0 
+EOS_ID = 1 
+UNK_ID = 2 
 
 def tokenizer(sentence):
   words = []
@@ -28,7 +34,7 @@ def form_vocab_mapping(max_size):
   vocab = {}
   data = []
   counter = 0
-  f = open('corpus/SAD.csv', 'r')
+  f = open(os.path.join(dirname,'corpus/SAD.csv'), 'r')
   for i, line in enumerate(csv.reader(f)):
     counter += 1
     if counter % 100000 == 0:
@@ -46,7 +52,7 @@ def form_vocab_mapping(max_size):
   if len(vocab_list) > max_size:
     vocab_list = vocab_list[:max_size]
 
-  with open('corpus/mapping', 'w') as o:
+  with open(os.path.join(dirname,'corpus/mapping'), 'w') as o:
     for w in vocab_list:
       o.write(w + '\n')
 

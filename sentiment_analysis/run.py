@@ -4,14 +4,21 @@ import random
 import os
 import sys
 import numpy as np
-sys.path.append('../sentiment_analysis/')
+#sys.path.append('../sentiment_analysis/')
 import dataset
-#from . import model
-import model
-from settings import *
+#import model
+#from settings import *
+from . import model
+from .settings import *
+dirname = os.path.dirname(os.path.abspath(__file__))
 
-def sentence_cutter(sentence):
-    sentence = [s for s in sentence]
+def sentence_cutter(sentence,mode="word"):
+    if mode == "word": 
+      sentence = jieba.lcut(sentenct)
+    elif mode == "char": 
+      sentence = [s for s in sentence]
+    elif mode == "nochange":
+      return sentence
     return (' ').join(sentence)
 
 def create_model(session, mode):
@@ -20,7 +27,7 @@ def create_model(session, mode):
                           BATCH_SIZE,
                           MAX_LENGTH,
                           mode)
-  ckpt = tf.train.get_checkpoint_state('./saved_model/')
+  ckpt = tf.train.get_checkpoint_state(os.path.join(dirname,'saved_model/'))
   print('ckpt: ',ckpt)
 
   if ckpt:
@@ -80,7 +87,10 @@ def train():
        print("Model Saved!")
        loss = 0
 
-def evaluate():
+def evaluate(cut_mode):
+  if cut_mode == "word":
+    import jieba_fast as jieba
+    jieba.load_userdict("dict_fasttext.txt")
   vocab_map, _ = dataset.read_map('corpus/mapping')
   sess = tf.Session()
   Model = create_model(sess, 'test')
@@ -89,20 +99,23 @@ def evaluate():
   sys.stdout.write('>')
   sys.stdout.flush()
   sentence = sys.stdin.readline()
-  sentence = sentence_cutter(sentence)
+  sentence = sentence_cutter(sentence,cut_mode)
 
   while(sentence):
+    print('sentence: ',sentence)
     token_ids = dataset.convert_to_token(sentence, vocab_map)
     print('toekn_ids: ',token_ids)
     encoder_input, encoder_length, _ = Model.get_batch([(0, token_ids)]) 
     print('encoder_input: ',encoder_input, encoder_input.shape)
     print('encoder_length: ',encoder_length)
     score = Model.step(sess, encoder_input, encoder_length)
-    print('Score: ' + str(score[0][0]))
+    print('Score: ' , score[0][0])
     print('>', end = '')
     sys.stdout.flush()
     sentence = sys.stdin.readline()
-    sentence = sentence_cutter(sentence)
+    sentence = sentence_cutter(sentence,cut_mode)
 if __name__ == '__main__':
-  train()
-  #evaluate()
+  #train()
+  cut_mode = "word"
+  cut_mode = "nochange"
+  evaluate(cut_mode)
