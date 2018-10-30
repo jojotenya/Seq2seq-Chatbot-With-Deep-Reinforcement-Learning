@@ -15,4 +15,4 @@ fb_setting.py
 *.txt
 *.csv
 *.bin
-saved_model/*
+sentiment_analysis_srnn/saved_model/*
