@@ -1,5 +1,5 @@
 #!/bin/bash
-model=$model
+model=xhj_300_4_32_jieba_s
 
 python run_srnn.py --mode=RL --batch_size=128 --reward_coef="{0:0.2}" --sampling_global_step=2500
 mkdir model_RL/$model/0.2;
