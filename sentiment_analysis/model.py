@@ -33,7 +33,7 @@ class discriminator():
     self.build_model()
     self.saver = tf.train.Saver(max_to_keep = 2)
 
-  def build_model(self,typ='cnn'):
+  def build_model(self,typ='rnn_last'):
     self.model_type[typ]()
 
   def build_model_cnn(self):
@@ -162,7 +162,8 @@ class discriminator():
         encoder_inputs.append(pair[1][:self.max_length])
         encoder_length.append(self.max_length)
       else:
-        encoder_pad = [dataset.PAD_ID] * (self.max_length - length)
+        #encoder_pad = [dataset.PAD_ID] * (self.max_length - length)
+        encoder_pad = [dataset.EOS_ID] * (self.max_length - length)
         encoder_inputs.append(pair[1] + encoder_pad)
         encoder_length.append(length)
 

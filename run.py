@@ -55,10 +55,17 @@ def create_seq2seq(session, mode):
                                 length_penalty_factor = FLAGS.length_penalty_factor
                                 )
   
-  #if mode != 'TEST':
-  ckpt = tf.train.get_checkpoint_state(FLAGS.model_dir)
-  #else:
-  #  ckpt = tf.train.get_checkpoint_state(FLAGS.model_rl_dir)
+  if mode != 'TEST':
+
+      if len(FLAGS.bind) > 0:
+          ckpt = tf.train.get_checkpoint_state(FLAGS.bind)
+      else:
+          ckpt = tf.train.get_checkpoint_state(FLAGS.model_dir)
+  else:
+      if len(FLAGS.bind) > 0:
+          ckpt = tf.train.get_checkpoint_state(FLAGS.bind)
+      else:
+          ckpt = tf.train.get_checkpoint_state(FLAGS.model_rl_dir)
   
   if ckpt:
     print("Reading model from %s, mode: %s" % (ckpt.model_checkpoint_path, mode))
@@ -200,6 +207,9 @@ def train_MLE():
         if step == FLAGS.sampling_global_step: break
 
 def train_RL():
+  if FLAGS.sent_word_seg == 'word':
+    import jieba
+    jieba.load_userdict('dict_fasttext.txt')
   g1 = tf.Graph()
   g2 = tf.Graph()
   g3 = tf.Graph()
@@ -210,7 +220,7 @@ def train_RL():
   with g1.as_default():
     model = create_seq2seq(sess1, 'RL')
     # we set sample size = ?
-    model.batch_size = 64 
+    model.batch_size = FLAGS.batch_size 
   # model_LM is for a reward function (language model)
   with g2.as_default():
     model_LM = create_seq2seq(sess2, 'MLE')
@@ -226,7 +236,13 @@ def train_RL():
     model_SA.batch_size = 1
  
   def SA(sentence, encoder_length):
-    sentence = ' '.join(sentence)
+    if FLAGS.sent_word_seg == 'word':
+      sentence = ''.join(sentence)
+      sentence = jieba.lcut(sentence) 
+      sentence = ' '.join(sentence)
+    elif FLAGS.sent_word_seg == 'char':
+      sentence = ' '.join(sentence)
+    
     token_ids = dataset.convert_to_token(sentence, model_SA.vocab_map)
     print('sentence: ',sentence)
     print('token_ids: ',token_ids)
@@ -264,9 +280,10 @@ def train_RL():
     
     # the same encoder_input for sampling batch_size times
     #encoder_input, decoder_input, weight = model.get_batch(d, bucket_id, rand = False)    
-    encoder_input, decoder_input, weight = model.get_batch(d_train, bucket_id, rand = False)    
-    print('encoder_input: ',len(encoder_input[0]))
-    print('decoder_input: ',len(decoder_input[0]))
+    #encoder_input, decoder_input, weight = model.get_batch(d_train, bucket_id, rand = False, initial_id=FLAGS.skip)    
+    encoder_input, decoder_input, weight = model.get_batch(d_train, bucket_id, rand = True, initial_id=FLAGS.skip)    
+    #print('encoder_input: ',len(encoder_input[0]))
+    #print('decoder_input: ',len(decoder_input[0]))
     print('batch_size: ',model.batch_size)
     loss = model.run(sess1, encoder_input, decoder_input, weight, bucket_id, X = LM, Y = SA)
     print('Loss: %s' %loss)
@@ -284,6 +301,8 @@ def train_RL():
       checkpoint_path = os.path.join(FLAGS.model_rl_dir, "RL.ckpt")
       model.saver.save(sess1, checkpoint_path, global_step = step)
       print('Saving model at step %s' % step)
+    if step == FLAGS.sampling_global_step: break
+    
 
 
 def inference(model,output,src_vocab_dict,trg_vocab_dict,debug=FLAGS.debug,verbose=True):
@@ -347,7 +366,7 @@ def inference(model,output,src_vocab_dict,trg_vocab_dict,debug=FLAGS.debug,verbo
 def test():
   if FLAGS.src_word_seg == 'word':
     import jieba
-    jieba.initialize()
+    jieba.load_userdict('dict_fasttext.txt')
   sess = tf.Session()
   src_vocab_dict, _ = data_utils.read_map(source_mapping)
   _ , trg_vocab_dict = data_utils.read_map(target_mapping)

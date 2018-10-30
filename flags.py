@@ -15,8 +15,12 @@ trg_vocab_size = 6185
 hidden_size = 300 
 num_layers = 4 
 batch_size = 32
+dir_base = 'xhj_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
+dir_base = 'xhj_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
 dir_base = 'ptt_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
+print('dir_base: ',dir_base)
 model_dir = 'model/%s/'%dir_base 
+#print('model_dir: ',model_dir)
 model_RL_dir = 'model_RL/%s/'%dir_base
 corpus_dir = 'corpus/%s/'%dir_base
 fasttext_model = './cc.zh.300.bin'
@@ -40,6 +44,7 @@ tf.app.flags.DEFINE_integer('trg_vocab_size', trg_vocab_size, 'vocabulary size o
 tf.app.flags.DEFINE_integer('hidden_size', hidden_size, 'number of units of hidden layer')
 tf.app.flags.DEFINE_integer('num_layers', num_layers, 'number of layers')
 tf.app.flags.DEFINE_integer('batch_size', batch_size, 'batch size')
+tf.app.flags.DEFINE_integer('skip', 0, 'skip samples')
 tf.app.flags.DEFINE_string('mode', 'MLE', 'mode of the seq2seq model')
 tf.app.flags.DEFINE_string('source_data', source_data, 'file of source')
 tf.app.flags.DEFINE_string('target_data', target_data, 'file of target')
@@ -59,17 +64,21 @@ tf.app.flags.DEFINE_string('length_penalty', 'penalty', 'length penalty type')
 tf.app.flags.DEFINE_float('length_penalty_factor', 0.6, 'length penalty factor')
 tf.app.flags.DEFINE_boolean('debug', True, 'debug')
 # schedule sampling
-tf.app.flags.DEFINE_string('schedule_sampling', 'linear', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
+tf.app.flags.DEFINE_string('schedule_sampling', 'False', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
 tf.app.flags.DEFINE_float('sampling_decay_rate', 0.99 , 'schedule sampling decay rate')
-tf.app.flags.DEFINE_integer('sampling_global_step', 150000, 'sampling_global_step')
+tf.app.flags.DEFINE_integer('sampling_global_step', 2500, 'sampling_global_step')
 tf.app.flags.DEFINE_integer('sampling_decay_steps', 500, 'sampling_decay_steps')
 tf.app.flags.DEFINE_boolean('reset_sampling_prob', False, 'reset_sampling_prob')
 # word segmentation type
 tf.app.flags.DEFINE_string('src_word_seg', 'word', 'source word segmentation type')
 tf.app.flags.DEFINE_string('trg_word_seg', 'char', 'target word segmentation type')
+tf.app.flags.DEFINE_string('sent_word_seg', 'word', 'sentiment word segmentation type')
 # if load pretrain word vector
-tf.app.flags.DEFINE_string('pretrain_vec', None, 'load pretrain word vector')
+tf.app.flags.DEFINE_string('pretrain_vec', 'fasttext', 'load pretrain word vector')
 tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable or not')
+
+tf.app.flags.DEFINE_string('bind', '', 'Server address')
+
 
 FLAGS = tf.app.flags.FLAGS
 

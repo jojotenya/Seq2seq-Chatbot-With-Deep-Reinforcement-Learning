@@ -455,7 +455,6 @@ class Seq2seq():
 
         # reward 3: sentiment analysis score
         #print('self.vocablist:' ,len(self.trg_vocab_list))
-        #print('token_ids: ',token_ids)
         ''' 
         word_token = []
         for token in token_ids:
@@ -472,10 +471,11 @@ class Seq2seq():
         print('r3: %s' % r3)
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3
         #reward[i] = 0 * r2 + r3
-        reward[i] = 0.7 * r2 + r3
+        reward[i] = 1 * r2 + r3
       #print(reward)
       # advantage
       reward = reward - np.mean(reward)
+      #print('reward: ',reward)
       _, decoder_inputs, target_weights = self.get_batch({bucket_id: new_data}, bucket_id, rand = False)
 
       # step 3: update seq2seq model
