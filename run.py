@@ -65,7 +65,10 @@ def create_seq2seq(session, mode):
       if len(FLAGS.bind) > 0:
           ckpt = tf.train.get_checkpoint_state(FLAGS.bind)
       else:
-          ckpt = tf.train.get_checkpoint_state(FLAGS.model_rl_dir)
+          if FLAGS.mode == "MLE":
+              ckpt = tf.train.get_checkpoint_state(FLAGS.model_dir)
+          elif FLAGS.mode == "RL":
+              ckpt = tf.train.get_checkpoint_state(FLAGS.model_rl_dir)
   
   if ckpt:
     print("Reading model from %s, mode: %s" % (ckpt.model_checkpoint_path, mode))
@@ -301,9 +304,9 @@ def train_RL():
       checkpoint_path = os.path.join(FLAGS.model_rl_dir, "RL.ckpt")
       model.saver.save(sess1, checkpoint_path, global_step = step)
       print('Saving model at step %s' % step)
+      with open('%s/loss_train'%FLAGS.model_rl_dir,'a') as f:
+        f.write('%s\n'%loss)
     if step == FLAGS.sampling_global_step: break
-    
-
 
 def inference(model,output,src_vocab_dict,trg_vocab_dict,debug=FLAGS.debug,verbose=True):
     print('output: ',type(output),len(output),type(output[0]),output[0].shape,output[0],np.sum(output[0]))

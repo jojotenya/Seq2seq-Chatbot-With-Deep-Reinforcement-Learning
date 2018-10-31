@@ -15,7 +15,7 @@ _dict = {
     }
 }
 
-train_type = "ptt"
+train_type = "sentiment"
 
 GO_ID = 0
 EOS_ID = 1

@@ -11,6 +11,7 @@ import copy
 
 import data_utils
 import seq2seq
+from flags import FLAGS
 
 setattr(tf.contrib.rnn.GRUCell, '__deepcopy__', lambda self, _: self)
 setattr(tf.contrib.rnn.BasicLSTMCell, '__deepcopy__', lambda self, _: self)

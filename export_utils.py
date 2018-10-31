@@ -41,21 +41,23 @@ def get_all_output_dfs(model_dicts,params,use_current_model=False,export_total=T
         dfs.append(df)
     if export_total:
         model_names = list(map(lambda x:x['name'],model_dicts))
+        corpus_names = list(map(lambda x:x['corpus'],model_dicts))
         dfs = list(map(lambda x,y:adjust_df_struct(x,y),dfs,model_names))
         dfs = pd.concat(dfs,axis=1)
-        same_corpus = from_same_corpus(model_names) 
-        if same_corpus:
-            sources = list(map(lambda x:(x,'source'),model_names))
-            targets = list(map(lambda x:(x,'target'),model_names))
-            st = copy.deepcopy(sources+targets)
-            source = sources.pop() 
-            target = targets.pop() 
-            dfs_source = dfs[source]
-            dfs_target = dfs[target]
-            dfs_source.name = 'source'
-            dfs_target.name = 'target'
-            dfs.drop(st,axis=1,inplace=True)
-            dfs = pd.concat([dfs_source,dfs_target,dfs],axis=1)
+        if len(model_names) > 1: 
+            same_corpus = from_same_corpus(model_names) 
+            if same_corpus:
+                sources = list(map(lambda x:(x,'source'),corpus_names))
+                targets = list(map(lambda x:(x,'target'),corpus_names))
+                st = copy.deepcopy(sources+targets)
+                source = sources.pop() 
+                target = targets.pop() 
+                dfs_source = dfs[source]
+                dfs_target = dfs[target]
+                dfs_source.name = 'source'
+                dfs_target.name = 'target'
+                dfs.drop(st,axis=1,inplace=True)
+                dfs = pd.concat([dfs_source,dfs_target,dfs],axis=1)
         dfs.to_csv(os.path.join(outputs_dir,'%s.csv'%datetime.now().strftime('%s')),index=False)
 
 def compare_corpus(name1,name2,result):
@@ -84,12 +86,12 @@ def get_output_dfs_per_model(model_dict,params,use_current_model=False,export_ea
         target_mapping = '%s.%s.mapping'%(FLAGS.target_data,FLAGS.trg_vocab_size)
         source_data = FLAGS.source_data
         target_data = FLAGS.target_data
-        model_name = FLAGS.model_dir 
-        model_name = re.sub('/','',model_name)
-        model_name = re.sub('model','',model_name)
+        #model_name = FLAGS.model_dir 
+        #model_name = re.sub('/','',model_name)
+        #model_name = re.sub('model','',model_name)
     else:
-        source_data = 'corpus/%s/source'%model_dict['name']
-        target_data = 'corpus/%s/target'%model_dict['name']
+        source_data = 'corpus/%s/source'%model_dict['corpus']
+        target_data = 'corpus/%s/target'%model_dict['corpus']
         source_mapping = '%s.%s.mapping'%(source_data,model_dict['source_token']) 
         target_mapping = '%s.%s.mapping'%(target_data,model_dict['target_token'])
         model_name = model_dict['name']
@@ -97,12 +99,18 @@ def get_output_dfs_per_model(model_dict,params,use_current_model=False,export_ea
         FLAGS.target_data = target_data
         FLAGS.src_vocab_size = model_dict['source_token'] 
         FLAGS.trg_vocab_size = model_dict['target_token'] 
-        FLAGS.model_dir = os.path.join('model/',model_name)
+        if FLAGS.mode == "MLE":
+            FLAGS.model_dir = os.path.join('model/',model_name)
+        elif FLAGS.mode == "RL":
+            FLAGS.model_rl_dir = os.path.join('model_RL/',model_name)
         if pretrain_vec == 'fasttext':
-            fasttext_hkl = 'corpus/%s/fasttext.hkl'%model_dict['name']
+            fasttext_hkl = 'corpus/%s/fasttext.hkl'%model_dict['corpus']
             FLAGS.pretrain_vec = hkl.load(fasttext_hkl)
     print('########################################################################')
-    print('model_dir: ',FLAGS.model_dir)
+    if FLAGS.mode == "MLE":
+        print('model_dir: ',FLAGS.model_dir)
+    elif FLAGS.mode == "RL":
+        print('model_rl_dir: ',FLAGS.model_rl_dir)
     print('fasttext_hkl: ',fasttext_hkl)
     print('########################################################################')
 
@@ -141,7 +149,9 @@ def get_output_dfs_per_model(model_dict,params,use_current_model=False,export_ea
     dfs = reduce(lambda x,y : x.join(y),dfs) 
     dfs = dfs.reset_index()
     if export_each:
-        dfs.to_csv(os.path.join(outputs_dir,'%s.csv'%model_dict['name']),index=False)
+        o_file = '%s.csv'%model_dict['name']
+        o_file = re.sub("/","_",o_file)
+        dfs.to_csv(os.path.join(outputs_dir,o_file),index=False)
     return dfs
 
 def get_all_products(params):
@@ -205,11 +215,18 @@ def get_output_df(sess,param,d_valid,model,src_vocab_dict,trg_vocab_dict):
 
 #### export figures ####
 def get_figure(model_name,index_start=index_start,index_end=index_end,use_current_model=False):
-    if use_current_model:
-        model_path = FLAGS.model_dir
-        model_name = re.sub('/','',model_path)
-        model_name = re.sub('model','',model_path)
-    model_path = os.path.join('model/',model_name)
+    if FLAGS.mode == "MLE":
+        if use_current_model:
+            model_path = FLAGS.model_dir
+            model_name = re.sub('/','',model_path)
+            model_name = re.sub('model','',model_name)
+        model_path = os.path.join('model/',model_name)
+    elif FLAGS.mode == "RL":
+        if use_current_model:
+            model_path = FLAGS.model_rl_dir
+            model_name = re.sub('/','',model_path)
+            model_name = re.sub('model_RL','',model_name)
+        model_path = os.path.join('model_RL/',model_name)
     train_path = os.path.join(model_path,'loss_train')
     val_path = os.path.join(model_path,'loss_val')
 
