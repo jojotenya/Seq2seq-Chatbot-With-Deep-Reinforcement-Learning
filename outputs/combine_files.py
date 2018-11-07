@@ -16,11 +16,12 @@ df.columns = ["id","source","target","change"]
 df_join = df[["id","change"]]
 df_left = df[["source","target"]]
 
-files = [0.2,0.5,0.75,1]
+files = ['',0.2,0.5,0.75,1]
 dfs = []
 for f in files:
-  if len(f) > 0: f = "_%s"%f 
+  if len(str(f)) > 0: f = "_%s"%f 
   df = pd.read_csv("%s%s.csv"%(prefix,f))
+  if f == "": f = "seq2seq"
   df.columns = ["id","source","target",f]
   df = df[["id",f]]
   dfs.append(df)
