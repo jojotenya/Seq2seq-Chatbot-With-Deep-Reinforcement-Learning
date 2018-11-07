@@ -22,7 +22,50 @@ model3 = {
           'target_token':6992,
          }
 
-models = [model1]
+model0 = {
+          'name':'xhj_300_4_32_jieba_s',
+          'corpus':'xhj_300_4_32_jieba_s',
+          'source_token':72255,
+          'target_token':5348,
+         }
+
+model1 = {
+          'name':'xhj_300_4_32_jieba_s/0.2',
+          'corpus':'xhj_300_4_32_jieba_s',
+          'source_token':72255,
+          'target_token':5348,
+         }
+
+
+model2 = {
+          'name':'xhj_300_4_32_jieba_s/0.5',
+          'corpus':'xhj_300_4_32_jieba_s',
+          'source_token':72255,
+          'target_token':5348,
+         }
+
+model3 = {
+          'name':'xhj_300_4_32_jieba_s/0.75',
+          'corpus':'xhj_300_4_32_jieba_s',
+          'source_token':72255,
+          'target_token':5348,
+         }
+
+model4 = {
+          'name':'xhj_300_4_32_jieba_s/1',
+          'corpus':'xhj_300_4_32_jieba_s',
+          'source_token':72255,
+          'target_token':5348,
+         }
+
+model5 = {
+          'name':'xhj_300_4_32_jieba_s/change',
+          'corpus':'xhj_300_4_32_jieba_s',
+          'source_token':72255,
+          'target_token':5348,
+         }
+
+models = [model1,model2,model3,model4,model5]
 
 params = [
   {'beam_search':False},

@@ -20,7 +20,7 @@ FLAGS.debug = False
 batch_size = 1
 
 dir_name = os.path.dirname(os.path.abspath(__file__))
-outputs_dir = os.path.join(dir_name,'outputs')
+outputs_dir = FLAGS.export_eval_dir
 if not os.path.exists(outputs_dir):
     print('create outputs dir: ',outputs_dir)
     os.mkdir(outputs_dir)
