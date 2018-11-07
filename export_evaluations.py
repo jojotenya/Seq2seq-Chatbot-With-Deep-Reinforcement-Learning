@@ -37,13 +37,27 @@ model2 = {
          }
 
 model3 = {
+          'name':'ptt_300_4_32_jieba_s/0.75',
+          'corpus':'ptt_300_4_32_jieba_s',
+          'source_token':150000,
+          'target_token':6185,
+         }
+
+model4 = {
+          'name':'ptt_300_4_32_jieba_s/1',
+          'corpus':'ptt_300_4_32_jieba_s',
+          'source_token':150000,
+          'target_token':6185,
+         }
+
+model5 = {
           'name':'ptt_300_4_32_jieba_s/change',
           'corpus':'ptt_300_4_32_jieba_s',
           'source_token':150000,
           'target_token':6185,
          }
 
-models = [model1,model2,model3]
+models = [model1,model2,model3,model4,model5]
 
 params = [
   {'beam_search':False},
