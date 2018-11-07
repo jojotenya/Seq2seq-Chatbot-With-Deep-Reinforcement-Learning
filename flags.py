@@ -82,6 +82,7 @@ tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable
 # reword coeficient
 tf.app.flags.DEFINE_string('reward_coef', '{0:0.2}', 'reward coeficient dictionary')
 
+tf.app.flags.DEFINE_string('export_eval_dir', os.path.join(dirname,"outputs"), 'directory of evaluation result')
 
 tf.app.flags.DEFINE_string('bind', '', 'Server address')
 
