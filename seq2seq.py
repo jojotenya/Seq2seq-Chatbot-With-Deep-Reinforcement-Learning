@@ -579,12 +579,24 @@ def embedding_attention_decoder(decoder_inputs,
         loop_function=loop_function,
         initial_state_attention=initial_state_attention)
 
+def loss_normalize(losses):
+    losses = tf.convert_to_tensor(losses,dtype=tf.float32)
+    mean, std = tf.nn.moments(losses,axes=[0])
+    std = tf.cast(std,dtype=tf.float32)
+    mean = tf.cast(mean,dtype=tf.float32)
+    #mean = tf.reduce_mean(losses)
+    #std = np.std(losses)
+    #return tf.floordiv(tf.subtract(losses,mean), std)
+    return (losses-mean)/(std+1e-12)
+
 def sequence_loss_by_example(logits,
                              targets,
                              weights,
                              average_across_timesteps=True,
                              softmax_loss_function=None,
-                             name=None):
+                             name=None,
+                             norm=False):
+  # 針對一個句子的output計算, sequence_loss則是針對一個batch計算
   """Weighted cross-entropy loss for a sequence of logits (per example).
 
   Args:
@@ -609,6 +621,7 @@ def sequence_loss_by_example(logits,
   with ops.name_scope(name, "sequence_loss_by_example",
                       logits + targets + weights):
     log_perp_list = []
+    # default的weight=1
     for logit, target, weight in zip(logits, targets, weights):
       if softmax_loss_function is None:
         # TODO(irving,ebrevdo): This reshape is needed because
@@ -620,13 +633,22 @@ def sequence_loss_by_example(logits,
       else:
         crossent = softmax_loss_function(target, logit)
       log_perp_list.append(crossent * weight)
-    log_perps = math_ops.add_n(log_perp_list)
+    # 主要是給計算cross entropy當reward用，所以可以負數。還要在思考這樣好不好
+    if norm: 
+        log_perp_list = loss_normalize(log_perp_list) 
+        log_perps = tf.reduce_sum(log_perp_list)
+    else:
+        log_perps = math_ops.add_n(log_perp_list)
     if average_across_timesteps:
       total_size = math_ops.add_n(weights)
       total_size += 1e-12  # Just to avoid division by 0 for all-0 weights.
-      log_perps /= total_size
+      try: 
+        log_perps /= total_size
+      except ValueError:
+        log_perps = tf.cast(log_perps,dtype=tf.float32)
+        total_size = tf.cast(total_size,dtype=tf.float32)
+        log_perps /= total_size
   return log_perps
-
 
 def sequence_loss(logits,
                   targets,
@@ -741,6 +763,9 @@ def model_with_buckets(encoder_inputs,
                                  decoder_inputs[:bucket[1]])
         #print('bucket_outputs-0: ',bucket_outputs[0],len(bucket_outputs[0]))
         outputs.append(bucket_outputs[0])
+        #outputs[-1]:  (?, 300)
+        #targets[:bucket[1]]:  (?,)
+        #weights[:bucket[1]]:  (?,)
         if per_example_loss:
           losses.append(
               sequence_loss_by_example(

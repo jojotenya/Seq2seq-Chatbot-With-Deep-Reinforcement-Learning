@@ -79,8 +79,11 @@ tf.app.flags.DEFINE_string('sent_word_seg', 'char', 'sentiment word segmentation
 # if load pretrain word vector
 tf.app.flags.DEFINE_string('pretrain_vec', 'fasttext', 'load pretrain word vector')
 tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable or not')
-# reword coeficient
+# RL reword related
 tf.app.flags.DEFINE_string('reward_coef', '{0:0.2}', 'reward coeficient dictionary')
+tf.app.flags.DEFINE_boolean('add_crossent', True, 'whether return cross entropy as reward')
+tf.app.flags.DEFINE_boolean('norm_crossent', True, 'whether normalize the cross entropy')
+tf.app.flags.DEFINE_float('reward_gamma', 0.95, 'reward discount rate')
 
 tf.app.flags.DEFINE_string('export_eval_dir', os.path.join(dirname,"outputs"), 'directory of evaluation result')
 

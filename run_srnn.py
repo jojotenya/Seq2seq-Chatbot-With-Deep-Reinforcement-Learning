@@ -216,6 +216,7 @@ def train_RL():
   #g3 = tf.Graph()
   sess1 = tf.Session(graph = g1)
   sess2 = tf.Session(graph = g2)
+  sess_global = tf.Session()
   #sess3 = tf.Session(graph = g3)
   # model is for training seq2seq with Reinforcement Learning
   with g1.as_default():
@@ -251,7 +252,7 @@ def train_RL():
     token_ids = utils_srnn.text_to_sequence(sentence)
     token_ids = utils_srnn.pad_sequences([token_ids], maxlen=utils_srnn.MAX_LEN) 
     token_ids = utils_srnn.get_split_list(token_ids,utils_srnn.SPLIT_DIMS)
-    print('sentence: ',sentence)
+    print('sentence: ',''.join(sentence))
     #print('token_ids: ',token_ids)
     #encoder_input, encoder_length, _ = model_SA.get_batch([(0, token_ids)])
     return model_SA.predict(np.array(token_ids),batch_size=1)[0][0]
@@ -293,7 +294,7 @@ def train_RL():
     #print('encoder_input: ',len(encoder_input[0]))
     #print('decoder_input: ',len(decoder_input[0]))
     print('batch_size: ',model.batch_size)
-    loss = model.run(sess1, encoder_input, decoder_input, weight, bucket_id, X = LM, Y = SA)
+    loss = model.run(sess1, encoder_input, decoder_input, weight, bucket_id, X = LM, Y = SA, sess_global=sess_global)
     print('Loss: %s' %loss)
     print('====================')
    

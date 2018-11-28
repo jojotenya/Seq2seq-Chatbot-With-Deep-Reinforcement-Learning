@@ -136,6 +136,7 @@ class Seq2seq():
       local_w_t = tf.cast(w_t, tf.float32)
       local_b = tf.cast(b, tf.float32)
       local_inputs = tf.cast(inputs, tf.float32)
+      # num_classes:所有的wordvec維度; num_sampled:取樣後使用的維度來計算softmax。
       return tf.cast(tf.nn.sampled_softmax_loss(weights = local_w_t,
                                                 biases = local_b,
                                                 inputs = local_inputs,
@@ -348,7 +349,24 @@ class Seq2seq():
   # calculate logP(b|a)
   # a and b are both list of token ids. ex:[1,2,3,4,5...]
   # a--> encoder_input, b--> decoder_input in get_batch
-  def prob(self, a, b, X, bucket_id):
+  def sample_softmax_loss(self, labels, inputs):
+    labels = tf.reshape(labels, [-1, 1])
+    local_w_t = tf.ones([self.trg_vocab_size, self.trg_vocab_size], dtype=tf.float32)
+    local_b = tf.zeros([self.trg_vocab_size], dtype=tf.float32)
+    local_inputs = tf.cast(inputs, tf.float32)
+    return tf.cast(tf.nn.sampled_softmax_loss(
+                     weights = local_w_t,
+                     biases = local_b,
+                     inputs = local_inputs,
+                     labels = labels,
+                     num_sampled = 512,
+                     num_classes = self.trg_vocab_size),
+                     dtype = tf.float32)
+
+  def prob(self, a, b, X, bucket_id, sess=None, add_crossent=False):
+    # a= r_input= encoder_inputs;
+    # b= token_ids= decoder_ouputs經過tf.multinomial取樣出的samples= policy最後選出的action
+    # X= LM model
     # define softmax
     def softmax(x):
       e_x = np.exp(x)
@@ -360,15 +378,26 @@ class Seq2seq():
     encoder_input, decoder_input, weight = self.get_batch({bucket_id: [(a, b)]}, bucket_id)
     self.batch_size = temp
     outputs = X(encoder_input, decoder_input, weight, bucket_id)
-    #print('b: ',b)
-    #print('outputs: ',outputs,outputs[0].shape)
+    #print('outputs: ',outputs, len(outputs),outputs[0].shape)
+    # len(outputs)==25, outpus[0].shape==6185
+    # outputs = list of arrays(timestep個),每一個都是6185維
+    #print('decoder_input: ',decoder_input,decoder_input[0].shape)
+    # len(decoder_input)==25, decoder_input[0].shape每一筆都不一樣
     r = 0.0
     # outputs已經project過(6258維)，看decoder_input的tokan_id(b)在output的softmax之機率高不高，越高reward越好。
-    for logit, i in zip(outputs, b):
-      #print('logit: ',logit,len(logit),logit[0].shape)
-      #print('i: ',i)
-      #print('r: ',np.log10(softmax(logit[0])[i]))
+    for j,(logit,i) in enumerate(zip(outputs, b)):
       r += np.log10(softmax(logit[0])[i])
+
+    if add_crossent:
+      r_crossentropy = seq2seq.sequence_loss_by_example(
+          outputs,
+          list(map(lambda x:x.reshape(1,-1),decoder_input)),
+          [np.array([1.])]*len(outputs),
+          softmax_loss_function=self.sample_softmax_loss,
+          norm=FLAGS.norm_crossent
+      )
+      r_crossentropy = sess.run(r_crossentropy)
+      r += 0.5*r_crossentropy
     return r
 
   # this function is specify for training of Reinforcement Learning case
@@ -377,7 +406,7 @@ class Seq2seq():
     _, self.trg_vocab_list = data_utils.read_map(trg_map_path)
 
   def run(self, sess, encoder_inputs, decoder_inputs, target_weights,
-          bucket_id, forward_only = False, X = None, Y = None):
+          bucket_id, forward_only = False, X = None, Y = None, sess_global=None):
     
     if self.mode == 'TEST':
         encoder_size = self.buckets[bucket_id][0]
@@ -447,15 +476,13 @@ class Seq2seq():
 
         r1 = -np.mean(temp_reward)
         '''
-        # reward 2: semantic coherence
+        # reward 2: semantic coherence +? crossentropy
         r_input = list(reversed([o[i] for o in encoder_inputs]))
         if data_utils.PAD_ID in r_input:
           r_input = r_input[:r_input.index(data_utils.PAD_ID)]
 
-        r2 = self.prob(r_input, token_ids, X, bucket_id) / float(len(token_ids)) if len(token_ids) != 0 else 0
+        r2 = self.prob(r_input, token_ids, X, bucket_id, sess=sess_global, add_crossent=FLAGS.add_crossent) / float(len(token_ids)) if len(token_ids) != 0 else 0
 
-        # reward 3: sentiment analysis score
-        #print('self.vocablist:' ,len(self.trg_vocab_list))
         ''' 
         word_token = []
         for token in token_ids:
@@ -470,13 +497,15 @@ class Seq2seq():
         '''
         print('r2: %s' % r2)
         print('r3: %s' % r3)
+        print('---------------')
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3
         reward_coef_dict = eval(FLAGS.reward_coef) 
         if i in reward_coef_dict: coef_r2 = reward_coef_dict[i]
         reward[i] = coef_r2 * r2 + r3
       #print(reward)
       # advantage
-      reward = reward - np.mean(reward)
+      #reward = reward - np.mean(reward)
+      reward = self.discount_and_normalize_rewards(reward,gamma=FLAGS.reward_gamma)  
       _, decoder_inputs, target_weights = self.get_batch({bucket_id: new_data}, bucket_id, rand = False)
 
       # step 3: update seq2seq model
@@ -492,6 +521,18 @@ class Seq2seq():
 
       return outputs[0]
 
+  def discount_and_normalize_rewards(self,episode_rewards,gamma=0.95):
+      discounted_episode_rewards = np.zeros_like(episode_rewards)
+      cumulative = 0.0
+      for i in reversed(range(len(episode_rewards))):
+          cumulative = cumulative * gamma + episode_rewards[i]
+          discounted_episode_rewards[i] = cumulative
+      
+      mean = np.mean(discounted_episode_rewards)
+      std = np.std(discounted_episode_rewards)
+      discounted_episode_rewards = (discounted_episode_rewards - mean) / (std+1e-12)
+  
+      return discounted_episode_rewards
 
   def get_batch(self, data, bucket_id, rand = True, initial_id=0):
     # data should be [whole_data_length x (source, target)] 
