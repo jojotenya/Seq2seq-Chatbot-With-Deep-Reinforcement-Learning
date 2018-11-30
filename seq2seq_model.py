@@ -397,7 +397,9 @@ class Seq2seq():
           norm=FLAGS.norm_crossent
       )
       r_crossentropy = sess.run(r_crossentropy)
+      print('r2 :',r)
       r += 0.5*r_crossentropy
+      print('r_crossent: ',r_crossentropy)
     return r
 
   # this function is specify for training of Reinforcement Learning case
@@ -495,7 +497,7 @@ class Seq2seq():
         '''
         print('r1: %s' % r1)
         '''
-        print('r2: %s' % r2)
+        #print('r2: %s' % r2)
         print('r3: %s' % r3)
         print('---------------')
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3

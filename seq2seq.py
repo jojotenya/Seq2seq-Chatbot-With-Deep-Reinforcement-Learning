@@ -644,7 +644,7 @@ def sequence_loss_by_example(logits,
       total_size += 1e-12  # Just to avoid division by 0 for all-0 weights.
       try: 
         log_perps /= total_size
-      except ValueError:
+      except (ValueError,TypeError) as e:
         log_perps = tf.cast(log_perps,dtype=tf.float32)
         total_size = tf.cast(total_size,dtype=tf.float32)
         log_perps /= total_size
