@@ -396,8 +396,7 @@ class Seq2seq():
           softmax_loss_function=None,
           norm=FLAGS.norm_crossent
       )
-      r_crossentropy = sess.run(tf.log(r_crossentropy))
-      if np.isnan(r_crossentropy): r_crossentropy = 0.
+      r_crossentropy = sess.run(tf.clip_by_value(tf.log(r_crossentropy),-100,100))
       print('r2(raw):',r)
       r += 0.3*r_crossentropy
       print('r_crossent(raw): ',r_crossentropy)
