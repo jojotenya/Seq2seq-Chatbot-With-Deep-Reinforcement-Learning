@@ -396,10 +396,10 @@ class Seq2seq():
           softmax_loss_function=None,
           norm=FLAGS.norm_crossent
       )
-      r_crossentropy = sess.run(r_crossentropy)
-      print('r2 :',r)
+      r_crossentropy = sess.run(tf.log(r_crossentropy))
+      print('r2(raw):',r)
       r += 0.5*r_crossentropy
-      print('r_crossent: ',r_crossentropy)
+      print('r_crossent(raw): ',r_crossentropy)
     return r
 
   # this function is specify for training of Reinforcement Learning case
@@ -470,6 +470,7 @@ class Seq2seq():
         if data_utils.EOS_ID in token_ids:
           token_ids = token_ids[:token_ids.index(data_utils.EOS_ID)]
         new_data.append(([], token_ids + [data_utils.EOS_ID]))
+        token_ids_count = len(token_ids)
         '''
         # in this case, X is language model score
         # reward 1: ease of answering
@@ -483,7 +484,7 @@ class Seq2seq():
         if data_utils.PAD_ID in r_input:
           r_input = r_input[:r_input.index(data_utils.PAD_ID)]
 
-        r2 = self.prob(r_input, token_ids, X, bucket_id, sess=sess_global, add_crossent=FLAGS.add_crossent) / float(len(token_ids)) if len(token_ids) != 0 else 0
+        r2 = self.prob(r_input, token_ids, X, bucket_id, sess=sess_global, add_crossent=FLAGS.add_crossent) / float(token_ids_count) if token_ids_count != 0 else 0
 
         ''' 
         word_token = []
@@ -493,11 +494,11 @@ class Seq2seq():
                 word_token.append(word.decode('utf-8'))
         ''' 
         word_token = [self.trg_vocab_list[token].decode('utf-8') for token in token_ids]
-        r3 = Y(word_token, np.array([len(token_ids)], dtype = np.int32))
+        r3 = Y(word_token, np.array([token_ids_count], dtype = np.int32))
         '''
         print('r1: %s' % r1)
         '''
-        #print('r2: %s' % r2)
+        print('r2: %s' % r2)
         print('r3: %s' % r3)
         print('---------------')
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3
