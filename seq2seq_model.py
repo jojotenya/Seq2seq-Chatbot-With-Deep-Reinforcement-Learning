@@ -393,7 +393,7 @@ class Seq2seq():
           outputs,
           list(map(lambda x:x.reshape(1,-1),decoder_input)),
           [np.array([1.])]*len(outputs),
-          softmax_loss_function=self.sample_softmax_loss,
+          softmax_loss_function=None,
           norm=FLAGS.norm_crossent
       )
       r_crossentropy = sess.run(r_crossentropy)
