@@ -397,8 +397,9 @@ class Seq2seq():
           norm=FLAGS.norm_crossent
       )
       r_crossentropy = sess.run(tf.log(r_crossentropy))
+      if np.isnan(r_crossentropy): r_crossentropy = 0.
       print('r2(raw):',r)
-      r += 0.5*r_crossentropy
+      r += 0.3*r_crossentropy
       print('r_crossent(raw): ',r_crossentropy)
     return r
 
