@@ -231,7 +231,7 @@ def train_RL():
     model_LM.batch_size = 1
 
   def LM(encoder_input, decoder_input, weight, bucket_id):
-    return model_LM.run(sess2, encoder_input, decoder_input, weight, bucket_id, forward_only = True)[1]
+    return model_LM.run(sess2, encoder_input, decoder_input, weight, bucket_id, forward_only = True)
   # new reward function: sentiment score
   #with g3.as_default():
   #  model_SA = run.create_model(sess3, 'test') 

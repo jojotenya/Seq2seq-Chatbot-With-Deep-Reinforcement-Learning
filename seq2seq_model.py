@@ -377,7 +377,7 @@ class Seq2seq():
     self.batch_size = 1
     encoder_input, decoder_input, weight = self.get_batch({bucket_id: [(a, b)]}, bucket_id)
     self.batch_size = temp
-    outputs = X(encoder_input, decoder_input, weight, bucket_id)
+    r_crossentropy, outputs = X(encoder_input, decoder_input, weight, bucket_id)
     #print('outputs: ',outputs, len(outputs),outputs[0].shape)
     # len(outputs)==25, outpus[0].shape==6185
     # outputs = list of arrays(timestep個),每一個都是6185維
@@ -389,17 +389,19 @@ class Seq2seq():
       r += np.log10(softmax(logit[0])[i])
 
     if add_crossent:
-      r_crossentropy = seq2seq.sequence_loss_by_example(
-          outputs,
-          list(map(lambda x:x.reshape(1,-1),decoder_input)),
-          [np.array([1.])]*len(outputs),
-          softmax_loss_function=None,
-          norm=FLAGS.norm_crossent
-      )
-      r_crossentropy = sess.run(tf.clip_by_value(tf.log(r_crossentropy),-100,100))
+      #r_crossentropy = seq2seq.sequence_loss_by_example(
+      #    outputs,
+      #    list(map(lambda x:x.reshape(1,-1),decoder_input)),
+      #    [np.array([1.])]*len(outputs),
+      #    softmax_loss_function=None,
+      #    norm=FLAGS.norm_crossent
+      #)
+      #r_crossentropy = sess.run(tf.clip_by_value(tf.log(r_crossentropy),-100,100))
+      r_crossentropy = np.clip(r_crossentropy,-100,100)
       print('r2(raw):',r)
-      r += 0.3*r_crossentropy
       print('r_crossent(raw): ',r_crossentropy)
+      #r += 0.1*r_crossentropy
+      return r, r_crossentropy
     return r
 
   # this function is specify for training of Reinforcement Learning case
@@ -484,7 +486,10 @@ class Seq2seq():
         if data_utils.PAD_ID in r_input:
           r_input = r_input[:r_input.index(data_utils.PAD_ID)]
 
-        r2 = self.prob(r_input, token_ids, X, bucket_id, sess=sess_global, add_crossent=FLAGS.add_crossent) / float(token_ids_count) if token_ids_count != 0 else 0
+        r2 = self.prob(r_input, token_ids, X, bucket_id, sess=sess_global, add_crossent=FLAGS.add_crossent)
+        if FLAGS.add_crossent:
+            r2, r_crossent = r2
+        r2 = r2 / float(token_ids_count) if token_ids_count != 0 else 0
 
         ''' 
         word_token = []
@@ -504,11 +509,15 @@ class Seq2seq():
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3
         reward_coef_dict = eval(FLAGS.reward_coef) 
         if i in reward_coef_dict: coef_r2 = reward_coef_dict[i]
-        reward[i] = coef_r2 * r2 + r3
+        if FLAGS.add_crossent:
+          reward[i] = 0.1*r_crossent + coef_r2 * r2 + r3
+        else:
+          reward[i] = coef_r2 * r2 + r3
       #print(reward)
       # advantage
       #reward = reward - np.mean(reward)
       reward = self.discount_and_normalize_rewards(reward,gamma=FLAGS.reward_gamma)  
+      print('reward: ',reward)
       _, decoder_inputs, target_weights = self.get_batch({bucket_id: new_data}, bucket_id, rand = False)
 
       # step 3: update seq2seq model

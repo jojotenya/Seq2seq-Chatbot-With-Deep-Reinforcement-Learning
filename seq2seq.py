@@ -656,7 +656,8 @@ def sequence_loss(logits,
                   average_across_timesteps=True,
                   average_across_batch=True,
                   softmax_loss_function=None,
-                  name=None):
+                  name=None,
+                  norm=False):
   """Weighted cross-entropy loss for a sequence of logits, batch-collapsed.
 
   Args:
@@ -683,7 +684,8 @@ def sequence_loss(logits,
             targets,
             weights,
             average_across_timesteps=average_across_timesteps,
-            softmax_loss_function=softmax_loss_function))
+            softmax_loss_function=softmax_loss_function,
+            norm=norm))
     if average_across_batch:
       batch_size = array_ops.shape(targets[0])[0]
       return cost / math_ops.cast(batch_size, cost.dtype)
@@ -699,7 +701,8 @@ def model_with_buckets(encoder_inputs,
                        seq2seq,
                        softmax_loss_function=None,
                        per_example_loss=False,
-                       name=None):
+                       name=None,
+                       norm=False):
   """Create a sequence-to-sequence model with support for bucketing.
 
   The seq2seq argument is a function that defines a sequence-to-sequence model,
@@ -772,14 +775,16 @@ def model_with_buckets(encoder_inputs,
                   outputs[-1],
                   targets[:bucket[1]],
                   weights[:bucket[1]],
-                  softmax_loss_function=softmax_loss_function))
+                  softmax_loss_function=softmax_loss_function,
+                  norm=norm))
         else:
           losses.append(
               sequence_loss(
                   outputs[-1],
                   targets[:bucket[1]],
                   weights[:bucket[1]],
-                  softmax_loss_function=softmax_loss_function))
+                  softmax_loss_function=softmax_loss_function,
+                  norm=norm))
 
   return outputs, losses
 
