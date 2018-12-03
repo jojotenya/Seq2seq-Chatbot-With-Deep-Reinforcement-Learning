@@ -505,7 +505,6 @@ class Seq2seq():
         '''
         print('r2: %s' % r2)
         print('r3: %s' % r3)
-        print('---------------')
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3
         reward_coef_dict = eval(FLAGS.reward_coef) 
         if i in reward_coef_dict: coef_r2 = reward_coef_dict[i]
@@ -513,11 +512,12 @@ class Seq2seq():
           reward[i] = 0.1*r_crossent + coef_r2 * r2 + r3
         else:
           reward[i] = coef_r2 * r2 + r3
+        print('reward: reward[i]')
+        print('---------------')
       #print(reward)
       # advantage
       #reward = reward - np.mean(reward)
       reward = self.discount_and_normalize_rewards(reward,gamma=FLAGS.reward_gamma)  
-      print('reward: ',reward)
       _, decoder_inputs, target_weights = self.get_batch({bucket_id: new_data}, bucket_id, rand = False)
 
       # step 3: update seq2seq model
