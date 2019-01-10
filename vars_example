@@ -47,9 +47,9 @@ export length_penalty_factor=0.6
 export debug=true
 
 #schedule sampling
-export schedule_sampling=false
+export schedule_sampling=False
 export sampling_decay_rate=0.99
-export sampling_global_step=5000
+export sampling_global_step=8000
 export sampling_decay_steps=500
 export reset_sampling_prob=false
 

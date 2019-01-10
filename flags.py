@@ -6,12 +6,6 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 
 src_vocab_size = int(os.environ["src_vocab_size"]) 
 trg_vocab_size = int(os.environ["trg_vocab_size"]) 
-# for xhj
-src_vocab_size = int(os.environ["src_vocab_size"]) 
-trg_vocab_size = int(os.environ["trg_vocab_size"]) 
-# ptt only
-src_vocab_size = int(os.environ["src_vocab_size"]) 
-trg_vocab_size = int(os.environ["trg_vocab_size"]) 
 hidden_size = int(os.environ["hidden_size"]) 
 num_layers  = int(os.environ["num_layers"]) 
 batch_size  = int(os.environ["batch_size"]) 
@@ -52,9 +46,9 @@ tf.app.flags.DEFINE_string('sentiment_model',os.environ["sentiment_model"], 'dir
 tf.app.flags.DEFINE_integer('check_step', int(os.environ["check_step"]), 'step interval of saving model')
 tf.app.flags.DEFINE_boolean('keep_best_model', bool(os.environ["keep_best_model"]), 'if performance of validation set not gonna be better, then forgo the model')
 # for rnn dropout
-tf.app.flags.DEFINE_float('input_keep_prob', bool(os.environ["input_keep_prob"]), 'step input dropout of saving model')
-tf.app.flags.DEFINE_float('output_keep_prob', bool(os.environ["output_keep_prob"]), 'step output dropout of saving model')
-tf.app.flags.DEFINE_float('state_keep_prob', bool(os.environ["state_keep_prob"]), 'step state dropout of saving model')
+tf.app.flags.DEFINE_float('input_keep_prob', float(os.environ["input_keep_prob"]), 'step input dropout of saving model')
+tf.app.flags.DEFINE_float('output_keep_prob', float(os.environ["output_keep_prob"]), 'step output dropout of saving model')
+tf.app.flags.DEFINE_float('state_keep_prob', float(os.environ["state_keep_prob"]), 'step state dropout of saving model')
 # output_keep_prob is the dropout added to the RNN's outputs, the dropout will have no effect on the calculation of the subsequent states.
 # beam search
 tf.app.flags.DEFINE_boolean('beam_search', bool(os.environ["beam_search"]), 'beam search')
@@ -63,7 +57,7 @@ tf.app.flags.DEFINE_string('length_penalty', os.environ["length_penalty"], 'leng
 tf.app.flags.DEFINE_float('length_penalty_factor', float(os.environ["length_penalty_factor"]), 'length penalty factor')
 tf.app.flags.DEFINE_boolean('debug', bool(os.environ["debug"]), 'debug')
 # schedule sampling
-tf.app.flags.DEFINE_string('schedule_sampling', bool(os.environ["schedule_sampling"]), 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
+tf.app.flags.DEFINE_string('schedule_sampling', os.environ["schedule_sampling"], 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
 tf.app.flags.DEFINE_float('sampling_decay_rate', float(os.environ["sampling_decay_rate"]), 'schedule sampling decay rate')
 #tf.app.flags.DEFINE_integer('sampling_global_step', 450000, 'sampling_global_step')
 tf.app.flags.DEFINE_integer('sampling_global_step', int(os.environ["sampling_global_step"]), 'sampling_global_step')
