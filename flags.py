@@ -77,7 +77,8 @@ tf.app.flags.DEFINE_string('sent_word_seg', os.environ["sent_word_seg"], 'sentim
 tf.app.flags.DEFINE_string('pretrain_vec', os.environ["pretrain_vec"], 'load pretrain word vector')
 tf.app.flags.DEFINE_boolean('pretrain_trainable', bool(os.environ["pretrain_trainable"]), 'pretrain vec trainable or not')
 # RL reword related
-tf.app.flags.DEFINE_string('reward_coef', os.environ["reward_coef"], 'reward coeficient dictionary')
+tf.app.flags.DEFINE_string('reward_coef_r2', os.environ["reward_coef_r2"], 'r2 coeficient dictionary')
+tf.app.flags.DEFINE_string('reward_coef_r_crossent', os.environ["reward_coef_r_crossent"], 'r_crossent coeficient dictionary')
 tf.app.flags.DEFINE_boolean('add_crossent', bool(os.environ["add_crossent"]), 'whether return cross entropy as reward')
 tf.app.flags.DEFINE_boolean('norm_crossent', bool(os.environ["norm_crossent"]), 'whether normalize the cross entropy')
 tf.app.flags.DEFINE_float('reward_gamma', float(os.environ["reward_gamma"]), 'reward discount rate')

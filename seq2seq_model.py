@@ -506,10 +506,12 @@ class Seq2seq():
         print('r2: %s' % r2)
         print('r3: %s' % r3)
         #reward[i] = 0.7 * r1 + 0.7 * r2 + r3
-        reward_coef_dict = eval(FLAGS.reward_coef) 
-        if i in reward_coef_dict: coef_r2 = reward_coef_dict[i]
+        r2_coef_dict = eval(FLAGS.reward_coef_r2) 
+        if i in r2_coef_dict: coef_r2 = r2_coef_dict[i]
+        r_crossent_coef_dict = eval(FLAGS.reward_coef_r_crossent) 
+        if i in r_crossent_coef_dict: coef_r_crossent = r_crossent_coef_dict[i]
         if FLAGS.add_crossent:
-          reward[i] = 0.1*r_crossent + coef_r2 * r2 + r3
+          reward[i] = coef_r_crossent *r_crossent + coef_r2 * r2 + r3
         else:
           reward[i] = coef_r2 * r2 + r3
         print('reward: ', reward[i])

@@ -63,7 +63,8 @@ export pretrain_vec=fasttext
 export pretrain_trainable=false
 
 #RL reword related
-export reward_coef={0:0.2}
+export reward_coef_r2={0:0.2}
+export reward_coef_r_crossent={0:0.1}
 export add_crossent=true
 export norm_crossent=true
 export reward_gamma=0.95
