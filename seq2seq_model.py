@@ -512,7 +512,7 @@ class Seq2seq():
           reward[i] = 0.1*r_crossent + coef_r2 * r2 + r3
         else:
           reward[i] = coef_r2 * r2 + r3
-        print('reward: reward[i]')
+        print('reward: ', reward[i])
         print('---------------')
       #print(reward)
       # advantage

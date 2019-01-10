@@ -4,32 +4,29 @@ import json
 import hickle as hkl 
 dirname = os.path.dirname(os.path.abspath(__file__))
 
-src_vocab_size = 200000 
-trg_vocab_size = 6992 
+src_vocab_size = int(os.environ["src_vocab_size"]) 
+trg_vocab_size = int(os.environ["trg_vocab_size"]) 
 # for xhj
-src_vocab_size = 72255 
-trg_vocab_size = 5348 
+src_vocab_size = int(os.environ["src_vocab_size"]) 
+trg_vocab_size = int(os.environ["trg_vocab_size"]) 
 # ptt only
-src_vocab_size = 150000 
-trg_vocab_size = 6185 
-hidden_size = 300 
-num_layers = 4 
-batch_size = 32 
-dir_base = 'xhj_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
-dir_base = 'xhj_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
-dir_base = 'ptt_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
-dir_base = 'ptt_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
+src_vocab_size = int(os.environ["src_vocab_size"]) 
+trg_vocab_size = int(os.environ["trg_vocab_size"]) 
+hidden_size = int(os.environ["hidden_size"]) 
+num_layers  = int(os.environ["num_layers"]) 
+batch_size  = int(os.environ["batch_size"]) 
+dir_base = os.environ["dir_base"] 
 print('dir_base: ',dir_base)
-model_dir = 'model/%s/'%dir_base 
+model_dir = os.environ["model_dir"] 
 #print('model_dir: ',model_dir)
-model_RL_dir = 'model_RL/%s/'%dir_base
-corpus_dir = 'corpus/%s/'%dir_base
-fasttext_model = './cc.zh.300.bin'
-source_data = '%ssource'%corpus_dir
-target_data = '%starget'%corpus_dir
-source_mapping = '%s.%s.mapping'%(source_data,src_vocab_size)
-target_mapping = '%s.%s.mapping'%(target_data,trg_vocab_size)
-fasttext_hkl = '%sfasttext.hkl'%corpus_dir 
+model_RL_dir = os.environ["model_RL_dir"] 
+corpus_dir = os.environ["corpus_dir"] 
+fasttext_model = os.environ["fasttext_model"] 
+source_data = os.environ["source_data"] 
+target_data = os.environ["target_data"]
+source_mapping = os.environ["source_mapping"] 
+target_mapping = os.environ["target_mapping"] 
+fasttext_hkl = os.environ["fasttext_hkl"] 
 if not os.path.exists(model_dir):
     print('create model dir: ',model_dir)
     os.mkdir(model_dir)
@@ -45,49 +42,49 @@ tf.app.flags.DEFINE_integer('trg_vocab_size', trg_vocab_size, 'vocabulary size o
 tf.app.flags.DEFINE_integer('hidden_size', hidden_size, 'number of units of hidden layer')
 tf.app.flags.DEFINE_integer('num_layers', num_layers, 'number of layers')
 tf.app.flags.DEFINE_integer('batch_size', batch_size, 'batch size')
-tf.app.flags.DEFINE_integer('skip', 0, 'skip samples')
-tf.app.flags.DEFINE_string('mode', 'MLE', 'mode of the seq2seq model')
+tf.app.flags.DEFINE_integer('skip', int(os.environ["skip"]) , 'skip samples')
+tf.app.flags.DEFINE_string('mode', os.environ["mode"], 'mode of the seq2seq model')
 tf.app.flags.DEFINE_string('source_data', source_data, 'file of source')
 tf.app.flags.DEFINE_string('target_data', target_data, 'file of target')
 tf.app.flags.DEFINE_string('model_dir', model_dir, 'directory of model')
 tf.app.flags.DEFINE_string('model_rl_dir',model_RL_dir, 'directory of RL model')
-tf.app.flags.DEFINE_string('sentiment_model','sentiment_analysis_srnn/saved_model/Model07', 'directory of sentiment model')
-tf.app.flags.DEFINE_integer('check_step', '500', 'step interval of saving model')
-tf.app.flags.DEFINE_boolean('keep_best_model', True, 'if performance of validation set not gonna be better, then forgo the model')
+tf.app.flags.DEFINE_string('sentiment_model',os.environ["sentiment_model"], 'directory of sentiment model')
+tf.app.flags.DEFINE_integer('check_step', int(os.environ["check_step"]), 'step interval of saving model')
+tf.app.flags.DEFINE_boolean('keep_best_model', bool(os.environ["keep_best_model"]), 'if performance of validation set not gonna be better, then forgo the model')
 # for rnn dropout
-tf.app.flags.DEFINE_float('input_keep_prob', '1.0', 'step input dropout of saving model')
-tf.app.flags.DEFINE_float('output_keep_prob', '1.0', 'step output dropout of saving model')
-tf.app.flags.DEFINE_float('state_keep_prob', '1.0', 'step state dropout of saving model')
+tf.app.flags.DEFINE_float('input_keep_prob', bool(os.environ["input_keep_prob"]), 'step input dropout of saving model')
+tf.app.flags.DEFINE_float('output_keep_prob', bool(os.environ["output_keep_prob"]), 'step output dropout of saving model')
+tf.app.flags.DEFINE_float('state_keep_prob', bool(os.environ["state_keep_prob"]), 'step state dropout of saving model')
 # output_keep_prob is the dropout added to the RNN's outputs, the dropout will have no effect on the calculation of the subsequent states.
 # beam search
-tf.app.flags.DEFINE_boolean('beam_search', False, 'beam search')
-tf.app.flags.DEFINE_integer('beam_size', 10 , 'beam size')
-tf.app.flags.DEFINE_string('length_penalty', 'penalty', 'length penalty type')
-tf.app.flags.DEFINE_float('length_penalty_factor', 0.6, 'length penalty factor')
-tf.app.flags.DEFINE_boolean('debug', True, 'debug')
+tf.app.flags.DEFINE_boolean('beam_search', bool(os.environ["beam_search"]), 'beam search')
+tf.app.flags.DEFINE_integer('beam_size', int(os.environ["beam_size"]), 'beam size')
+tf.app.flags.DEFINE_string('length_penalty', os.environ["length_penalty"], 'length penalty type')
+tf.app.flags.DEFINE_float('length_penalty_factor', float(os.environ["length_penalty_factor"]), 'length penalty factor')
+tf.app.flags.DEFINE_boolean('debug', bool(os.environ["debug"]), 'debug')
 # schedule sampling
-tf.app.flags.DEFINE_string('schedule_sampling', 'False', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
-tf.app.flags.DEFINE_float('sampling_decay_rate', 0.99 , 'schedule sampling decay rate')
+tf.app.flags.DEFINE_string('schedule_sampling', bool(os.environ["schedule_sampling"]), 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
+tf.app.flags.DEFINE_float('sampling_decay_rate', float(os.environ["sampling_decay_rate"]), 'schedule sampling decay rate')
 #tf.app.flags.DEFINE_integer('sampling_global_step', 450000, 'sampling_global_step')
-tf.app.flags.DEFINE_integer('sampling_global_step', 2500, 'sampling_global_step')
-tf.app.flags.DEFINE_integer('sampling_decay_steps', 500, 'sampling_decay_steps')
-tf.app.flags.DEFINE_boolean('reset_sampling_prob', False, 'reset_sampling_prob')
+tf.app.flags.DEFINE_integer('sampling_global_step', int(os.environ["sampling_global_step"]), 'sampling_global_step')
+tf.app.flags.DEFINE_integer('sampling_decay_steps', int(os.environ["sampling_decay_steps"]), 'sampling_decay_steps')
+tf.app.flags.DEFINE_boolean('reset_sampling_prob', bool(os.environ["reset_sampling_prob"]), 'reset_sampling_prob')
 # word segmentation type
-tf.app.flags.DEFINE_string('src_word_seg', 'word', 'source word segmentation type')
-tf.app.flags.DEFINE_string('trg_word_seg', 'char', 'target word segmentation type')
-tf.app.flags.DEFINE_string('sent_word_seg', 'char', 'sentiment word segmentation type')
+tf.app.flags.DEFINE_string('src_word_seg', os.environ["src_word_seg"], 'source word segmentation type')
+tf.app.flags.DEFINE_string('trg_word_seg', os.environ["trg_word_seg"], 'target word segmentation type')
+tf.app.flags.DEFINE_string('sent_word_seg', os.environ["sent_word_seg"], 'sentiment word segmentation type')
 # if load pretrain word vector
-tf.app.flags.DEFINE_string('pretrain_vec', 'fasttext', 'load pretrain word vector')
-tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable or not')
+tf.app.flags.DEFINE_string('pretrain_vec', os.environ["pretrain_vec"], 'load pretrain word vector')
+tf.app.flags.DEFINE_boolean('pretrain_trainable', bool(os.environ["pretrain_trainable"]), 'pretrain vec trainable or not')
 # RL reword related
-tf.app.flags.DEFINE_string('reward_coef', '{0:0.2}', 'reward coeficient dictionary')
-tf.app.flags.DEFINE_boolean('add_crossent', True, 'whether return cross entropy as reward')
-tf.app.flags.DEFINE_boolean('norm_crossent', True, 'whether normalize the cross entropy')
-tf.app.flags.DEFINE_float('reward_gamma', 0.95, 'reward discount rate')
+tf.app.flags.DEFINE_string('reward_coef', os.environ["reward_coef"], 'reward coeficient dictionary')
+tf.app.flags.DEFINE_boolean('add_crossent', bool(os.environ["add_crossent"]), 'whether return cross entropy as reward')
+tf.app.flags.DEFINE_boolean('norm_crossent', bool(os.environ["norm_crossent"]), 'whether normalize the cross entropy')
+tf.app.flags.DEFINE_float('reward_gamma', float(os.environ["reward_gamma"]), 'reward discount rate')
 
 tf.app.flags.DEFINE_string('export_eval_dir', os.path.join(dirname,"outputs"), 'directory of evaluation result')
 
-tf.app.flags.DEFINE_string('bind', '', 'Server address')
+tf.app.flags.DEFINE_string('bind', os.environ["bind"], 'Server address')
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -103,33 +100,33 @@ elif FLAGS.pretrain_vec == 'fasttext':
 print('trainable: ',FLAGS.pretrain_trainable)
 
 # for data etl
-SEED = 112
-buckets = [(10, 10), (15, 15), (25, 25), (50, 50)]
-split_ratio = 0.995
+SEED = os.environ["SEED"] 
+buckets = eval(os.environ["buckets"]) 
+split_ratio = float(os.environ["split_ratio"]) 
 
 # for inference filter dirty words
 with open('replace_words.json','r') as f:
     replace_words = json.load(f)
 
 # for reset schedule sampling probability
-reset_prob = 1.0
+reset_prob = float(os.environ["reset_prob"])
 
 # apply same word segment strategy to both source and target or not
-word_seg_strategy = 'diff'
+word_seg_strategy = os.environ["word_seg_strategy"] 
 
 # special tags 
-_PAD = b"PAD"
-_GO = b"GO"
-_EOS = b"EOS"
-_UNK = b"UNK"
+_PAD = os.environ["_PAD"].encode('utf-8') 
+_GO = os.environ["_GO"].encode('utf-8') 
+_EOS = os.environ["_EOS"].encode('utf-8') 
+_UNK = os.environ["_UNK"].encode('utf-8') 
 _START_VOCAB = [_PAD, _GO, _EOS, _UNK]
 SPECIAL_TAGS_COUNT = len(_START_VOCAB)
 
-PAD_ID = 0
-GO_ID = 1
-EOS_ID = 2
-UNK_ID = 3
+PAD_ID = os.environ["PAD_ID"] 
+GO_ID = os.environ["GO_ID"] 
+EOS_ID = os.environ["EOS_ID"] 
+UNK_ID = os.environ["UNK_ID"] 
 
 # word segmentation dictionary
-dict_path = 'dict_fasttext.txt'
+dict_path = os.environ["dict_path"] 
 dict_path = os.path.join(dirname,dict_path)
