@@ -49,7 +49,7 @@ export debug=true
 #schedule sampling
 export schedule_sampling=False
 export sampling_decay_rate=0.99
-export sampling_global_step=8000
+export sampling_global_step=5000
 export sampling_decay_steps=500
 export reset_sampling_prob=false
 
@@ -69,6 +69,7 @@ export add_crossent=true
 export norm_crossent=true
 export reward_gamma=0.95
 export bind=
+export max_to_keep=5
 
 #for data etl
 export SEED=112

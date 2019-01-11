@@ -312,7 +312,7 @@ class Seq2seq():
         self.update.append(optimizer.apply_gradients(zip(clipped_gradients, tf.trainable_variables())))
 
     # specify saver
-    self.saver = tf.train.Saver(max_to_keep = 2)
+    self.saver = tf.train.Saver(max_to_keep = FLAGS.max_to_keep)
 
   # token_vector: list [batch_size, vocab_size] of length max_length
   # return: list of length batch_size, each contain the list of the decoded sentence

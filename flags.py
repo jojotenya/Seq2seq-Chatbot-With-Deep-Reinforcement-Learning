@@ -79,7 +79,9 @@ tf.app.flags.DEFINE_float('reward_gamma', float(os.environ["reward_gamma"]), 're
 
 tf.app.flags.DEFINE_string('export_eval_dir', os.path.join(dirname,"outputs"), 'directory of evaluation result')
 
+# model bind and save
 tf.app.flags.DEFINE_string('bind', os.environ["bind"], 'Server address')
+tf.app.flags.DEFINE_string('max_to_keep', os.environ["max_to_keep"], 'max model to keep')
 
 
 FLAGS = tf.app.flags.FLAGS
