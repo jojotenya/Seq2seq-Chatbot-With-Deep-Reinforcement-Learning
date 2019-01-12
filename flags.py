@@ -1,7 +1,7 @@
 import tensorflow as tf
 import os
 import json
-import hickle as hkl 
+import numpy as np
 dirname = os.path.dirname(os.path.abspath(__file__))
 
 src_vocab_size = int(os.environ["src_vocab_size"]) 
@@ -93,7 +93,8 @@ if FLAGS.length_penalty == 'False' or FLAGS.length_penalty == 'None':
 if FLAGS.pretrain_vec == 'None': 
     FLAGS.pretrain_vec = None
 elif FLAGS.pretrain_vec == 'fasttext':
-    FLAGS.pretrain_vec = hkl.load(fasttext_hkl)
+    FLAGS.pretrain_vec = np.load(fasttext_hkl)
+
 print('trainable: ',FLAGS.pretrain_trainable)
 
 # for data etl
