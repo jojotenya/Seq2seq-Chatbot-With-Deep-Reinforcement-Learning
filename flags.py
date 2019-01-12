@@ -20,7 +20,7 @@ source_data = os.environ["source_data"]
 target_data = os.environ["target_data"]
 source_mapping = os.environ["source_mapping"] 
 target_mapping = os.environ["target_mapping"] 
-fasttext_hkl = os.environ["fasttext_hkl"] 
+fasttext_npy = os.environ["fasttext_npy"] 
 if not os.path.exists(model_dir):
     print('create model dir: ',model_dir)
     os.mkdir(model_dir)
@@ -93,7 +93,7 @@ if FLAGS.length_penalty == 'False' or FLAGS.length_penalty == 'None':
 if FLAGS.pretrain_vec == 'None': 
     FLAGS.pretrain_vec = None
 elif FLAGS.pretrain_vec == 'fasttext':
-    FLAGS.pretrain_vec = np.load(fasttext_hkl)
+    FLAGS.pretrain_vec = np.load(fasttext_npy)
 
 print('trainable: ',FLAGS.pretrain_trainable)
 
