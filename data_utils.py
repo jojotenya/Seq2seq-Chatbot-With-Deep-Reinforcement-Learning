@@ -274,8 +274,7 @@ def simple2tradition(text):
 def tradition2simple(text):
     return opencc.convert(text,config='zht2zhs.ini')
 
-def load_fasttext_vec(model_path,mapping,hkl_file,t2s=False):
-    import pickle as hkl
+def load_fasttext_vec(model_path,mapping,npy_file,t2s=False):
     from fastText import load_model
     model = load_model(model_path)
     text = []
@@ -287,7 +286,7 @@ def load_fasttext_vec(model_path,mapping,hkl_file,t2s=False):
             vec = model.get_word_vector(row)
             text.append(vec)
     text = np.array(text)
-    hkl.dump(text,hkl_file)
+    np.save(npy_file,text)
     
 if __name__ == "__main__":
   prepare_whole_data('corpus/source', 'corpus/target', src_vocab_size)

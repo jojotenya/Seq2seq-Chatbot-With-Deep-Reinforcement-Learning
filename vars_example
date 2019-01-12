@@ -40,7 +40,8 @@ export output_keep_prob=1.0
 export state_keep_prob=1.0
 
 #beam search
-export beam_search=false
+##bool("") == False
+export beam_search=
 export beam_size=10
 export length_penalty=penalty
 export length_penalty_factor=0.6
@@ -51,7 +52,7 @@ export schedule_sampling=False
 export sampling_decay_rate=0.99
 export sampling_global_step=5000
 export sampling_decay_steps=500
-export reset_sampling_prob=false
+export reset_sampling_prob=
 
 #word segmentation type
 export src_word_seg=word
@@ -60,7 +61,7 @@ export sent_word_seg=char
 
 #if load pretrain word vector
 export pretrain_vec=fasttext
-export pretrain_trainable=false
+export pretrain_trainable=
 
 #RL reword related
 export reward_coef_r2={0:0.2}

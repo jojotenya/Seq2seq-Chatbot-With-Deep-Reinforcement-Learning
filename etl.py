@@ -30,4 +30,4 @@ data_utils.split_train_val(args.src,args.trg)
 data_utils.prepare_whole_data(FLAGS.source_data, FLAGS.target_data, FLAGS.src_vocab_size, FLAGS.trg_vocab_size, mode=word_seg_strategy)
 
 #step 4. load vec from pretrain fasttext model
-data_utils.load_fasttext_vec(fasttext_model,source_mapping,fasttext_hkl)
+data_utils.load_fasttext_vec(fasttext_model,source_mapping,fasttext_npy)
