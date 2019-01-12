@@ -5,11 +5,11 @@ import os
 import re
 import copy
 import pandas as pd
+import numpy as np
 from datetime import datetime
 from itertools import product
 from functools import reduce
 from collections import namedtuple
-import hickle as hkl
 from run import create_seq2seq, inference
 from flags import FLAGS, buckets
 import data_utils
@@ -104,14 +104,14 @@ def get_output_dfs_per_model(model_dict,params,use_current_model=False,export_ea
         elif FLAGS.mode == "RL":
             FLAGS.model_rl_dir = os.path.join('model_RL/',model_name)
         if pretrain_vec == 'fasttext':
-            fasttext_hkl = 'corpus/%s/fasttext.hkl'%model_dict['corpus']
-            FLAGS.pretrain_vec = hkl.load(fasttext_hkl)
+            fasttext_npy = 'corpus/%s/fasttext.npy'%model_dict['corpus']
+            FLAGS.pretrain_vec = np.load(fasttext_npy)
     print('########################################################################')
     if FLAGS.mode == "MLE":
         print('model_dir: ',FLAGS.model_dir)
     elif FLAGS.mode == "RL":
         print('model_rl_dir: ',FLAGS.model_rl_dir)
-    print('fasttext_hkl: ',fasttext_hkl)
+    print('fasttext_npy: ',fasttext_npy)
     print('########################################################################')
 
     d_valid = data_utils.read_data(source_data + '_val.token',target_data + '_val.token',buckets)  
