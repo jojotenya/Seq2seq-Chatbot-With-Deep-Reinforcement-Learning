@@ -6,13 +6,14 @@ import os
 import sys 
 sys.path.append('sentiment_analysis/')
 import math
-#from termcolor import colored
+from termcolor import colored
 
 import data_utils
 import seq2seq_model
 from seq2seq import bernoulli_sampling
-from sentiment_analysis import run
-from sentiment_analysis import dataset
+#from sentiment_analysis import run
+#from sentiment_analysis import dataset
+from sentiment_analysis_srnn import utils as utils_srnn 
 from flags import FLAGS, SEED, buckets, replace_words, reset_prob, source_mapping, target_mapping 
 from utils import qulify_sentence
 
@@ -65,10 +66,7 @@ def create_seq2seq(session, mode):
       if len(FLAGS.bind) > 0:
           ckpt = tf.train.get_checkpoint_state(FLAGS.bind)
       else:
-          if FLAGS.mode == "MLE":
-              ckpt = tf.train.get_checkpoint_state(FLAGS.model_dir)
-          elif FLAGS.mode == "RL":
-              ckpt = tf.train.get_checkpoint_state(FLAGS.model_rl_dir)
+          ckpt = tf.train.get_checkpoint_state(FLAGS.model_rl_dir)
   
   if ckpt:
     print("Reading model from %s, mode: %s" % (ckpt.model_checkpoint_path, mode))
@@ -215,10 +213,11 @@ def train_RL():
     jieba.load_userdict('dict_fasttext.txt')
   g1 = tf.Graph()
   g2 = tf.Graph()
-  g3 = tf.Graph()
+  #g3 = tf.Graph()
   sess1 = tf.Session(graph = g1)
   sess2 = tf.Session(graph = g2)
-  sess3 = tf.Session(graph = g3)
+  sess_global = tf.Session()
+  #sess3 = tf.Session(graph = g3)
   # model is for training seq2seq with Reinforcement Learning
   with g1.as_default():
     model = create_seq2seq(sess1, 'RL')
@@ -232,11 +231,13 @@ def train_RL():
     model_LM.batch_size = 1
 
   def LM(encoder_input, decoder_input, weight, bucket_id):
-    return model_LM.run(sess2, encoder_input, decoder_input, weight, bucket_id, forward_only = True)[1]
+    return model_LM.run(sess2, encoder_input, decoder_input, weight, bucket_id, forward_only = True)
   # new reward function: sentiment score
-  with g3.as_default():
-    model_SA = run.create_model(sess3, 'test') 
-    model_SA.batch_size = 1
+  #with g3.as_default():
+  #  model_SA = run.create_model(sess3, 'test') 
+  #  model_SA.batch_size = 1
+  from keras.models import load_model
+  model_SA = load_model(utils_srnn.model_dir)
  
   def SA(sentence, encoder_length):
     if FLAGS.sent_word_seg == 'word':
@@ -244,13 +245,18 @@ def train_RL():
       sentence = jieba.lcut(sentence) 
       sentence = ' '.join(sentence)
     elif FLAGS.sent_word_seg == 'char':
-      sentence = ' '.join(sentence)
+      #sentence = ' '.join(sentence)
+      pass
     
-    token_ids = dataset.convert_to_token(sentence, model_SA.vocab_map)
-    print('sentence: ',sentence)
-    print('token_ids: ',token_ids)
-    encoder_input, encoder_length, _ = model_SA.get_batch([(0, token_ids)])
-    return model_SA.step(sess3, encoder_input, encoder_length)[0][0]
+    #token_ids = dataset.convert_to_token(sentence, model_SA.vocab_map)
+    token_ids = utils_srnn.text_to_sequence(sentence)
+    token_ids = utils_srnn.pad_sequences([token_ids], maxlen=utils_srnn.MAX_LEN) 
+    token_ids = utils_srnn.get_split_list(token_ids,utils_srnn.SPLIT_DIMS)
+    print('sentence: ',''.join(sentence))
+    #print('token_ids: ',token_ids)
+    #encoder_input, encoder_length, _ = model_SA.get_batch([(0, token_ids)])
+    return model_SA.predict(np.array(token_ids),batch_size=1)[0][0]
+    #return model_SA.step(sess3, encoder_input, encoder_length)[0][0]
 
   '''
   data_utils.prepare_whole_data(FLAGS.source_data, FLAGS.target_data, FLAGS.src_vocab_size, FLAGS.trg_vocab_size)
@@ -288,7 +294,7 @@ def train_RL():
     #print('encoder_input: ',len(encoder_input[0]))
     #print('decoder_input: ',len(decoder_input[0]))
     print('batch_size: ',model.batch_size)
-    loss = model.run(sess1, encoder_input, decoder_input, weight, bucket_id, X = LM, Y = SA)
+    loss = model.run(sess1, encoder_input, decoder_input, weight, bucket_id, X = LM, Y = SA, sess_global=sess_global)
     print('Loss: %s' %loss)
     print('====================')
    
@@ -304,9 +310,9 @@ def train_RL():
       checkpoint_path = os.path.join(FLAGS.model_rl_dir, "RL.ckpt")
       model.saver.save(sess1, checkpoint_path, global_step = step)
       print('Saving model at step %s' % step)
-      with open('%s/loss_train'%FLAGS.model_rl_dir,'a') as f:
-        f.write('%s\n'%loss)
     if step == FLAGS.sampling_global_step: break
+    
+
 
 def inference(model,output,src_vocab_dict,trg_vocab_dict,debug=FLAGS.debug,verbose=True):
     print('output: ',type(output),len(output),type(output[0]),output[0].shape,output[0],np.sum(output[0]))
@@ -334,8 +340,8 @@ def inference(model,output,src_vocab_dict,trg_vocab_dict,debug=FLAGS.debug,verbo
                 sys_reply = data_utils.sub_words(sys_reply)
                 sys_reply = qulify_sentence(sys_reply)
                 if i == 0:
-                    #print(colored("Syetem reply(bs best): " + sys_reply,"red"))
-                    print("Syetem reply(bs best): " + sys_reply,"red")
+                    if verbose:
+                        print(colored("Syetem reply(bs best): " + sys_reply,"red"))
                 else:
                     if verbose:
                         print("Syetem reply(bs all): " + sys_reply)

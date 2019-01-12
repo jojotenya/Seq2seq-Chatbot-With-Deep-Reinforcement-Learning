@@ -1,0 +1,99 @@
+#!/bin/bash
+get_abs_filename() {
+  # $1 : relative filename
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
+
+export src_vocab_size=200000 
+export trg_vocab_size=6992 
+#for xhj
+export src_vocab_size=72255 
+export trg_vocab_size=5348 
+#ptt only
+export src_vocab_size=150000 
+export trg_vocab_size=6185 
+export hidden_size=300 
+export num_layers=4 
+export batch_size=32 
+export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
+export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_jieba_s
+export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
+export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_jieba_s
+export model_dir=model/${dir_base}/ 
+export model_RL_dir=model_RL/${dir_base}/
+export corpus_dir=corpus/${dir_base}/
+export fasttext_model=./cc.zh.300.bin
+export source_data=${corpus_dir}source
+export target_data=${corpus_dir}target
+export source_mapping=${source_data}.${src_vocab_size}.mapping
+export target_mapping=${target_data}.${trg_vocab_size}.mapping
+export fasttext_hkl=${corpus_dir}fasttext.hkl
+export skip=0
+export mode=MLE
+export sentiment_model=sentiment_analysis_srnn/saved_model/Model07
+export check_step=500
+export keep_best_model=true
+
+#for rnn dropout
+export input_keep_prob=1.0
+export output_keep_prob=1.0
+export state_keep_prob=1.0
+
+#beam search
+export beam_search=false
+export beam_size=10
+export length_penalty=penalty
+export length_penalty_factor=0.6
+export debug=true
+
+#schedule sampling
+export schedule_sampling=False
+export sampling_decay_rate=0.99
+export sampling_global_step=5000
+export sampling_decay_steps=500
+export reset_sampling_prob=false
+
+#word segmentation type
+export src_word_seg=word
+export trg_word_seg=char
+export sent_word_seg=char
+
+#if load pretrain word vector
+export pretrain_vec=fasttext
+export pretrain_trainable=false
+
+#RL reword related
+export reward_coef_r2={0:0.2}
+export reward_coef_r_crossent={0:0.1}
+export add_crossent=true
+export norm_crossent=true
+export reward_gamma=0.95
+export bind=
+export max_to_keep=5
+
+#for data etl
+export SEED=112
+export buckets="[(10, 10), (15, 15), (25, 25), (50, 50)]"
+export split_ratio=0.995
+
+#for reset schedule sampling probability
+export reset_prob=1.0
+
+#apply same word segment strategy to both source and target or not
+export word_seg_strategy=diff
+
+#special tags 
+export _PAD=PAD
+export _GO=GO
+export _EOS=EOS
+export _UNK=UNK
+export _START_VOCAB=(${_PAD} ${_GO} ${_EOS} ${_UNK})
+export SPECIAL_TAGS_COUNT=${#_START_VOCAB[@]}
+
+export PAD_ID=0
+export GO_ID=1
+export EOS_ID=2
+export UNK_ID=3
+
+#word segmentation dictionary
+export dict_path=dict_fasttext.txt
