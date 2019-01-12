@@ -4,8 +4,9 @@ from __future__ import division
 import re
 import sys
 #import nltk
-from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size
+from flags import buckets,split_ratio,SEED,replace_words,src_vocab_size,_START_VOCAB,SPECIAL_TAGS_COUNT,PAD_ID,GO_ID,EOS_ID,UNK_ID,dict_path
 import jieba
+#import opencc
 import numpy as np
 
 import tensorflow as tf
@@ -16,18 +17,6 @@ import subprocess
 WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
 DIGIT_RE = re.compile(br"\d")
 DU_RE = re.compile(b"\!")
-
-_PAD = b"PAD"
-_GO = b"GO"
-_EOS = b"EOS"
-_UNK = b"UNK"
-
-_START_VOCAB = [_PAD, _GO, _EOS, _UNK]
-
-PAD_ID = 0
-GO_ID = 1
-EOS_ID = 2
-UNK_ID = 3
 
 # Tokenize a sentence into a word list
 def tokenizer(sentence):
@@ -207,6 +196,19 @@ def read_token_data(file_path):
   else:
     raise ValueError("Can not find token file %s" % token_path)
 
+def token_to_text(ids,mapping):
+    with open(mapping,'r') as f:
+        mapping = [row.strip() for row in f.readlines()]
+    mapping = np.array(mapping)
+    if isinstance(ids,list):
+        ids = np.array(ids)
+    elif isinstance(ids,str):
+        ids = int(ids)
+        ids = np.array([ids])
+    elif isinstance(ids,int):
+        ids = np.array([ids])
+    return mapping[ids]
+
 def sub_words(word):
     for rep in replace_words.keys():
         if rep in word:
@@ -215,7 +217,7 @@ def sub_words(word):
 
 def word_seg(input_file,output_file,mode):
     if mode == 'word':
-        jieba.load_userdict('dict.txt')
+        jieba.load_userdict(dict_path)
     
     with open(output_file,'w') as f, open(input_file,'r') as fi:
         for l in fi:
@@ -252,17 +254,39 @@ def split_train_val(source,target,buckets=buckets):
 
         for b, ds in zip(buckets, data):
             dl = len(ds)
+            split_index = int(dl*split_ratio)
             print('\n')
             print(b)
             print('data : ' + str(dl))
             for i, d in enumerate(ds):
                 (s, t, sl, tl) = d
-                if i < int(dl*split_ratio):
+                if i < split_index:
                     src_train.write(s)
                     trg_train.write(t)
                 else:
                     src_val.write(s)
                     trg_val.write(t)
+
+def simple2tradition(text):
+    return opencc.convert(text, config='zhs2zht.ini')
+
+def tradition2simple(text):
+    return opencc.convert(text,config='zht2zhs.ini')
+
+def load_fasttext_vec(model_path,mapping,hkl_file,t2s=False):
+    import pickle as hkl
+    from fastText import load_model
+    model = load_model(model_path)
+    text = []
+    with open(mapping, 'r') as f:
+        for row in f.readlines():
+            row = row.strip()
+            if t2s:
+                row = tradition2simple(row)
+            vec = model.get_word_vector(row)
+            text.append(vec)
+    text = np.array(text)
+    hkl.dump(text,hkl_file)
     
 if __name__ == "__main__":
   prepare_whole_data('corpus/source', 'corpus/target', src_vocab_size)

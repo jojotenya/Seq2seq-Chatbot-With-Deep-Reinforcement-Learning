@@ -1,7 +1,8 @@
 # download jieba dictionary
 dict="dict.txt.zip","1jxdJOdPRy1HceAEVVr3cB8jlhXXxJ7PD"
+dict_fasttext="dict_fasttext.txt.gz","1jk6pjs535ujn4SQkK5GTwy_LWaLbyMto"
 
-files_arr=($dict)
+files_arr=($dict,$dict_fasttext)
 for f in ${files_arr[@]}; do
     IFS=',' read filename fileid <<< "${f}"
     curl -L -o "${filename}" "https://drive.google.com/uc?export=download&id=${fileid}"
@@ -29,3 +30,7 @@ cd sentiment_analysis/corpus; ./download.sh; cd ../../
 
 # soft link jieba dictionary
 #cd sentiment_analysis; ln -s ../dict.txt ./
+
+# download fasttext chinese model
+wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.zh.300.bin.gz
+gunzip cc.zh.300.bin.gz

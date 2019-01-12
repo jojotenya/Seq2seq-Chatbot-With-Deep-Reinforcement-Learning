@@ -1,19 +1,29 @@
 import tensorflow as tf
 import os
 import json
+import pickle as hkl 
+dirname = os.path.dirname(os.path.abspath(__file__))
 
-src_vocab_size = 67000 
-trg_vocab_size = 5348 
-hidden_size = 512
+schedule_sampling = 'linear'
+schedule_sampling = 'False' 
+src_vocab_size = 150000 
+trg_vocab_size = 6185 
+hidden_size = 300 
 num_layers = 4 
 batch_size = 32
-dir_base = 'xhj_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
-dir_base = 'xhj_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
+if schedule_sampling != 'False': 
+    dir_base = 'xhj_%s_%s_%s_sche_jieba_s'%(hidden_size,num_layers,batch_size)
+else:
+    dir_base = 'xhj_%s_%s_%s_jieba_s'%(hidden_size,num_layers,batch_size)
 model_dir = 'model/%s/'%dir_base 
 model_RL_dir = 'model_RL/%s/'%dir_base
-corpus_dir = 'corpus/%s'%dir_base
-source_data = '%s/source'%corpus_dir
-target_data = '%s/target'%corpus_dir
+corpus_dir = 'corpus/%s/'%dir_base
+fasttext_model = './cc.zh.300.bin'
+source_data = '%ssource'%corpus_dir
+target_data = '%starget'%corpus_dir
+source_mapping = '%s.%s.mapping'%(source_data,src_vocab_size)
+target_mapping = '%s.%s.mapping'%(target_data,trg_vocab_size)
+fasttext_hkl = '%sfasttext.hkl'%corpus_dir 
 if not os.path.exists(model_dir):
     print('create model dir: ',model_dir)
     os.mkdir(model_dir)
@@ -45,23 +55,31 @@ tf.app.flags.DEFINE_boolean('beam_search', False, 'beam search')
 tf.app.flags.DEFINE_integer('beam_size', 10 , 'beam size')
 tf.app.flags.DEFINE_boolean('debug', True, 'debug')
 # schedule sampling
-tf.app.flags.DEFINE_string('schedule_sampling', 'linear', 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
+tf.app.flags.DEFINE_string('schedule_sampling', schedule_sampling, 'schedule sampling type[linear|exp|inverse_sigmoid|False]')
 tf.app.flags.DEFINE_float('sampling_decay_rate', 0.99 , 'schedule sampling decay rate')
-tf.app.flags.DEFINE_integer('sampling_global_step', 10000000, 'sampling_global_step')
+tf.app.flags.DEFINE_integer('sampling_global_step', 100000, 'sampling_global_step')
 tf.app.flags.DEFINE_integer('sampling_decay_steps', 300, 'sampling_decay_steps')
 tf.app.flags.DEFINE_boolean('reset_sampling_prob', False, 'reset_sampling_prob')
 # word segmentation type
 tf.app.flags.DEFINE_string('src_word_seg', 'word', 'source word segmentation type')
 tf.app.flags.DEFINE_string('trg_word_seg', 'char', 'target word segmentation type')
-
+# if load pretrain word vector
+tf.app.flags.DEFINE_string('pretrain_vec', None, 'load pretrain word vector')
+tf.app.flags.DEFINE_boolean('pretrain_trainable', False, 'pretrain vec trainable or not')
 
 FLAGS = tf.app.flags.FLAGS
 
+if FLAGS.schedule_sampling == 'False': 
+    FLAGS.schedule_sampling = False
+if FLAGS.pretrain_vec == 'None': 
+    FLAGS.pretrain_vec = None
+elif FLAGS.pretrain_vec == 'fasttext':
+    FLAGS.pretrain_vec = hkl.load(fasttext_hkl)
 
 # for data etl
 SEED = 112
 buckets = [(10, 10), (15, 15), (25, 25), (50, 50)]
-split_ratio = 0.9
+split_ratio = 0.995
 
 # for inference filter dirty words
 with open('replace_words.json','r') as f:
@@ -72,3 +90,20 @@ reset_prob = 1.0
 
 # apply same word segment strategy to both source and target or not
 word_seg_strategy = 'diff'
+
+# special tags 
+_PAD = b"PAD"
+_GO = b"GO"
+_EOS = b"EOS"
+_UNK = b"UNK"
+_START_VOCAB = [_PAD, _GO, _EOS, _UNK]
+SPECIAL_TAGS_COUNT = len(_START_VOCAB)
+
+PAD_ID = 0
+GO_ID = 1
+EOS_ID = 2
+UNK_ID = 3
+
+# word segmentation dictionary
+dict_path = 'dict_fasttext.txt'
+dict_path = os.path.join(dirname,dict_path)

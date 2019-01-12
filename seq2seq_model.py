@@ -34,7 +34,9 @@ class Seq2seq():
                schedule_sampling='linear', 
                sampling_decay_rate=0.99,
                sampling_global_step=150000,
-               sampling_decay_steps=500
+               sampling_decay_steps=500,
+               pretrain_vec = None,
+               pretrain_trainable = False,
                ):
     
     self.src_vocab_size = src_vocab_size
@@ -66,6 +68,10 @@ class Seq2seq():
     # beam search
     self.beam_search = beam_search
     self.beam_size = beam_size
+
+    # if load pretrain word vector
+    self.pretrain_vec = pretrain_vec
+    self.pretrain_trainable = pretrain_trainable
 
     # schedule sampling
     self.sampling_probability_clip = None 
@@ -135,8 +141,23 @@ class Seq2seq():
     softmax_loss_function = sample_loss
 
     #FIXME add RL function
-    def seq2seq_multi(encoder_inputs, decoder_inputs, mode):
-      embedding = tf.get_variable("embedding", [self.src_vocab_size, self.size])
+    def seq2seq_multi(encoder_inputs, decoder_inputs, mode, pretrain_vec = None):
+      if pretrain_vec is not None: 
+        pad_num = self.src_vocab_size - pretrain_vec.shape[0]
+        pretrain_vec = np.pad(pretrain_vec, [(0, pad_num), (0, 0)], mode='constant')
+        tag_vec = pretrain_vec[:data_utils.SPECIAL_TAGS_COUNT]
+        pretrain_vec = pretrain_vec[data_utils.SPECIAL_TAGS_COUNT:]
+        special_tags = tf.get_variable(
+                name="special_tags",
+                initializer = tag_vec,
+                trainable = True)
+        embedding = tf.get_variable(
+                name = "embedding", 
+                initializer = pretrain_vec,
+                trainable = self.pretrain_trainable)
+        embedding = tf.concat([special_tags,embedding],0)
+      else:
+        embedding = tf.get_variable("embedding", [self.src_vocab_size, self.size])
       loop_function_RL = None
       if mode == 'MLE':
         feed_previous = False
@@ -213,7 +234,7 @@ class Seq2seq():
     if self.mode == 'MLE':
       self.outputs, self.losses = seq2seq.model_with_buckets(
            self.encoder_inputs, self.decoder_inputs, targets,
-           self.target_weights, self.buckets, lambda x, y: seq2seq_multi(x, y, self.mode),
+           self.target_weights, self.buckets, lambda x, y: seq2seq_multi(x, y, self.mode, self.pretrain_vec),
            softmax_loss_function = softmax_loss_function)
       
       for b in range(len(self.buckets)):
@@ -232,7 +253,7 @@ class Seq2seq():
 
       self.outputs, self.losses = seq2seq.model_with_buckets(
            self.encoder_inputs, self.decoder_inputs, targets,
-           self.target_weights, self.buckets, lambda x, y: seq2seq_multi(x, y, self.mode),
+           self.target_weights, self.buckets, lambda x, y: seq2seq_multi(x, y, self.mode, self.pretrain_vec),
            softmax_loss_function = softmax_loss_function)
     
       for b in range(len(self.buckets)):
@@ -245,7 +266,7 @@ class Seq2seq():
 
       self.outputs, self.losses = seq2seq.model_with_buckets(
            self.encoder_inputs, self.decoder_inputs, targets,
-           self.target_weights, self.buckets, lambda x, y: seq2seq_multi(x, y, self.mode),
+           self.target_weights, self.buckets, lambda x, y: seq2seq_multi(x, y, self.mode, self.pretrain_vec),
            softmax_loss_function = softmax_loss_function, per_example_loss = True)
     
       #print('self.buckets: ',len(self.buckets))
