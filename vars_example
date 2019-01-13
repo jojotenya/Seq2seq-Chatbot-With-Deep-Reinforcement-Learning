@@ -4,14 +4,16 @@ get_abs_filename() {
   echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
 
-export src_vocab_size=200000 
-export trg_vocab_size=6992 
+#for sentiment_srnn
+export style_train_type="ptt"
 #for xhj
 export src_vocab_size=72255 
 export trg_vocab_size=5348 
 #ptt only
 export src_vocab_size=150000 
 export trg_vocab_size=6185 
+export src_vocab_size=200000 
+export trg_vocab_size=6992 
 export hidden_size=300 
 export num_layers=4 
 export batch_size=32 
@@ -19,6 +21,7 @@ export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
 export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_jieba_s
 export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
 export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_jieba_s
+export dir_base=xhj_ptt_${hidden_size}_${num_layers}_${batch_size}_jieba_s
 export model_dir=model/${dir_base}/ 
 export model_RL_dir=model_RL/${dir_base}/
 export corpus_dir=corpus/${dir_base}/
@@ -40,7 +43,6 @@ export output_keep_prob=1.0
 export state_keep_prob=1.0
 
 #beam search
-##bool("") == False
 export beam_search=
 export beam_size=10
 export length_penalty=penalty
@@ -98,3 +100,4 @@ export UNK_ID=3
 
 #word segmentation dictionary
 export dict_path=dict_fasttext.txt
+
