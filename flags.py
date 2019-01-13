@@ -98,7 +98,7 @@ elif FLAGS.pretrain_vec == 'fasttext':
 print('trainable: ',FLAGS.pretrain_trainable)
 
 # for data etl
-SEED = os.environ["SEED"] 
+SEED = int(os.environ["SEED"])
 buckets = eval(os.environ["buckets"]) 
 split_ratio = float(os.environ["split_ratio"]) 
 
@@ -120,10 +120,10 @@ _UNK = os.environ["_UNK"].encode('utf-8')
 _START_VOCAB = [_PAD, _GO, _EOS, _UNK]
 SPECIAL_TAGS_COUNT = len(_START_VOCAB)
 
-PAD_ID = os.environ["PAD_ID"] 
-GO_ID = os.environ["GO_ID"] 
-EOS_ID = os.environ["EOS_ID"] 
-UNK_ID = os.environ["UNK_ID"] 
+PAD_ID = int(os.environ["PAD_ID"])
+GO_ID  = int(os.environ["GO_ID"]) 
+EOS_ID = int(os.environ["EOS_ID"]) 
+UNK_ID = int(os.environ["UNK_ID"]) 
 
 # word segmentation dictionary
 dict_path = os.environ["dict_path"] 
