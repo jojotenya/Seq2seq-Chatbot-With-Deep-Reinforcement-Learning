@@ -3,11 +3,12 @@ from functools import reduce
 import argparse 
 import os
 dirname = os.path.dirname(os.path.abspath(__file__))
-default_dir = os.path.join(dirname,'xhj_dropout/xhj_300_4_32_jieba_s')
-default_dir = os.path.join(dirname,'xhj/xhj_300_4_32_jieba_s')
+default_dir = os.path.join(dirname,'ptt_dropout/ptt_300_4_32_jieba_s')
+default_dir = os.path.join(dirname,'ptt/ptt_300_4_32_jieba_s')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--prefix", default=default_dir, help="prefix")
+parser.add_argument("--epoch", default='', help="epoch")
 args = parser.parse_args()
 
 prefix = args.prefix
@@ -29,4 +30,8 @@ dfs.append(df_join)
 df = reduce(lambda x,y: x.merge(y,on="id") ,dfs)
 
 df = pd.concat([df[["id"]],df_left,df.drop("id",axis=1)],axis=1)
-df.to_csv("%s_combined.csv"%prefix,index=False)
+if len(args.epoch) > 0:
+    csv_name = "%s_combined_%s.csv"%(prefix,args.epoch)
+else:
+    csv_name = "%s_combined.csv"%prefix
+df.to_csv(csv_name,index=False)
