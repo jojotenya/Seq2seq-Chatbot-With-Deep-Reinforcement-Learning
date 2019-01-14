@@ -30,39 +30,39 @@ model0 = {
          }
 
 model1 = {
-          'name':'xhj_300_4_32_jieba_s/0.2',
-          'corpus':'xhj_300_4_32_jieba_s',
-          'source_token':72255,
-          'target_token':5348,
+          'name':'%s/0.2'%(os.environ["dir_base"]),
+          'corpus':os.environ["dir_base"],
+          'source_token':int(os.environ["src_vocab_size"]),
+          'target_token':int(os.environ["trg_vocab_size"]),
          }
 
 
 model2 = {
-          'name':'xhj_300_4_32_jieba_s/0.5',
-          'corpus':'xhj_300_4_32_jieba_s',
-          'source_token':72255,
-          'target_token':5348,
+          'name':'%s/0.5'%(os.environ["dir_base"]),
+          'corpus':os.environ["dir_base"],
+          'source_token':int(os.environ["src_vocab_size"]),
+          'target_token':int(os.environ["trg_vocab_size"]),
          }
 
 model3 = {
-          'name':'xhj_300_4_32_jieba_s/0.75',
-          'corpus':'xhj_300_4_32_jieba_s',
-          'source_token':72255,
-          'target_token':5348,
+          'name':'%s/0.75'%(os.environ["dir_base"]),
+          'corpus':os.environ["dir_base"],
+          'source_token':int(os.environ["src_vocab_size"]),
+          'target_token':int(os.environ["trg_vocab_size"]),
          }
 
 model4 = {
-          'name':'xhj_300_4_32_jieba_s/1',
-          'corpus':'xhj_300_4_32_jieba_s',
-          'source_token':72255,
-          'target_token':5348,
+          'name':'%s/1'%(os.environ["dir_base"]),
+          'corpus':os.environ["dir_base"],
+          'source_token':int(os.environ["src_vocab_size"]),
+          'target_token':int(os.environ["trg_vocab_size"]),
          }
 
 model5 = {
-          'name':'xhj_300_4_32_jieba_s/change',
-          'corpus':'xhj_300_4_32_jieba_s',
-          'source_token':72255,
-          'target_token':5348,
+          'name':'%s/change'%(os.environ["dir_base"]),
+          'corpus':os.environ["dir_base"],
+          'source_token':int(os.environ["src_vocab_size"]),
+          'target_token':int(os.environ["trg_vocab_size"]),
          }
 
 models = [model1,model2,model3,model4,model5]

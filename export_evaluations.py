@@ -2,10 +2,10 @@ from export_utils import *
 
 #export evaluations
 model1 = {
-          'name':'ptt_300_4_32_jieba_s',
-          'corpus':'ptt_300_4_32_jieba_s',
-          'source_token':150000,
-          'target_token':6185,
+          'name':os.environ["dir_base"],
+          'corpus':os.environ["dir_base"],
+          'source_token':int(os.environ["src_vocab_size"]),
+          'target_token':int(os.environ["trg_vocab_size"]),
          }
 
 model2 = {
