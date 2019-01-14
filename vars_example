@@ -6,12 +6,13 @@ get_abs_filename() {
 
 #for sentiment_srnn
 export which_corpus=ptt
-declare -A style_type_dict=( ["ptt"]="sentiment" ["xhj"]="sentiment" ["xhj_ptt"]="ptt" )
-#export style_train_type="ptt"
-export style_type="${style_type_dict[$which_corpus]}"
 export hidden_size=300 
 export num_layers=4 
 export batch_size=32 
+
+declare -A style_type_dict=( ["ptt"]="sentiment" ["xhj"]="sentiment" ["xhj_ptt"]="ptt" )
+#export style_train_type="ptt"
+export style_type="${style_type_dict[$which_corpus]}"
 
 declare -A src_vocab_size_dict=( ["ptt"]="150000" ["xhj"]="72255" ["xhj_ptt"]="200000" )
 declare -A trg_vocab_size_dict=( ["ptt"]="6185" ["xhj"]="5348" ["xhj_ptt"]="6992" )
