@@ -15,7 +15,7 @@ _dict = {
     }
 }
 
-train_type = os.environ["style_train_type"] 
+train_type = os.environ["style_type"] 
 
 GO_ID = 0
 EOS_ID = 1
