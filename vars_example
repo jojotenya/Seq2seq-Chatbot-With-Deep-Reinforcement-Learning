@@ -5,23 +5,35 @@ get_abs_filename() {
 }
 
 #for sentiment_srnn
-export style_train_type="ptt"
-#for xhj
-export src_vocab_size=72255 
-export trg_vocab_size=5348 
-#ptt only
-export src_vocab_size=150000 
-export trg_vocab_size=6185 
-export src_vocab_size=200000 
-export trg_vocab_size=6992 
+export which_corpus=ptt
 export hidden_size=300 
 export num_layers=4 
 export batch_size=32 
-export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
-export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_jieba_s
-export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
-export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_jieba_s
-export dir_base=xhj_ptt_${hidden_size}_${num_layers}_${batch_size}_jieba_s
+
+declare -A style_type_dict=( ["ptt"]="sentiment" ["xhj"]="sentiment" ["xhj_ptt"]="ptt" )
+#export style_train_type="ptt"
+export style_type="${style_type_dict[$which_corpus]}"
+
+declare -A src_vocab_size_dict=( ["ptt"]="150000" ["xhj"]="72255" ["xhj_ptt"]="200000" )
+declare -A trg_vocab_size_dict=( ["ptt"]="6185" ["xhj"]="5348" ["xhj_ptt"]="6992" )
+export src_vocab_size="${src_vocab_size_dict[$which_corpus]}" 
+export trg_vocab_size="${trg_vocab_size_dict[$which_corpus]}" 
+
+##for xhj
+#export src_vocab_size=72255 
+#export trg_vocab_size=5348 
+##ptt only
+#export src_vocab_size=150000 
+#export trg_vocab_size=6185 
+##xhj_ptt
+#export src_vocab_size=200000 
+#export trg_vocab_size=6992 
+#export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
+#export dir_base=xhj_${hidden_size}_${num_layers}_${batch_size}_jieba_s
+#export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_sche_jieba_s
+#export dir_base=ptt_${hidden_size}_${num_layers}_${batch_size}_jieba_s
+#export dir_base=xhj_ptt_${hidden_size}_${num_layers}_${batch_size}_jieba_s
+export dir_base=${which_corpus}_${hidden_size}_${num_layers}_${batch_size}_jieba_s
 export model_dir=model/${dir_base}/ 
 export model_RL_dir=model_RL/${dir_base}/
 export corpus_dir=corpus/${dir_base}/
