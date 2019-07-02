@@ -5,7 +5,7 @@ get_abs_filename() {
 }
 
 #for sentiment_srnn
-export which_corpus=ptt
+export which_corpus=xhj_ptt
 export hidden_size=300 
 export num_layers=4 
 export batch_size=32 
@@ -45,6 +45,7 @@ export target_mapping=${target_data}.${trg_vocab_size}.mapping
 export fasttext_npy=${corpus_dir}fasttext.npy
 export skip=0
 export mode=MLE
+export test_mode=MLE
 export sentiment_model=sentiment_analysis_srnn/saved_model/Model07
 export check_step=500
 export keep_best_model=true

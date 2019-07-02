@@ -7,20 +7,20 @@ This project is aimed to make chatbot responses more positive.
 	- Sentiment Analysis Score: Trying make chatbot's response positive.
 	- Coherence Score: To make response suitable for the users' input.
 
-## Prerequisites
-1. Python packages:
-	- Python 3.6 or higher
-	- Tensorflow r1.8 or higher
-	- Numpy
-
-2. Clone this repository:
-```shell=
-https://github.com/k7922n/Seq2seq-Chatbot-With-Deep-Reinforcement-Learning.git
-```
-
 ## Usage
 
 Before training the seq2seq model with reinforcement learning, you need to pre-train the seq2seq model and sentiment analysis model.
+
+### Prerequisites 
+1. execute `./download` to get dictionary
+
+2. execute `pip install -r requirements.txt`
+
+3. execute `mv vars_example vars`
+
+4. customize your variables in vars
+
+5. execute `source vars` 
 
 ### Sentiment Analysis Model:
 
